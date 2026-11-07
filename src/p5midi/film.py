@@ -71,15 +71,37 @@ Rules:
   big fact or a scene change, "sting" for a cut to a new place or time, "swell" for a big question or
   an emotional peak. Put t exactly on the start time of the line (or the key word) it belongs to.
 - key: a minor key that suits the film (A, C, D, E or G minor).
+- If the narration is only "[shot N]" markers (a picture-only video), follow the "brief" and give the
+  film an arc on those shot times: an inviting start, a build, a peak around two thirds in, a resolve.
+  Promos and upbeat briefs use wonder/warmth/triumph more than unease.
 Answer with the JSON only."""
 
 
-def plan_cues(lines: list[dict], regions: list[dict], duration: float, ai=None, title: str = '') -> dict:
+def scene_cuts(video: str | Path, threshold: float = 0.3) -> list[float]:
+    """Cut times (seconds) from ffmpeg's scene detector."""
+    from .analyze import _run
+    out = _run(['-i', str(video), '-vf', f"select='gt(scene,{threshold})',showinfo", '-an', '-f', 'null', '-'])
+    cuts = sorted({round(float(m), 2) for m in re.findall(r'pts_time:([\d.]+)', out)})
+    keep, last = [], -9.0
+    for c in cuts:                       # flashes and fast montages: at most one cut per 1.5 s
+        if c - last >= 1.5:
+            keep.append(c)
+            last = c
+    return keep
+
+
+def cut_lines(cuts: list[float], duration: float) -> list[dict]:
+    """Picture-only videos: each shot becomes a timed 'line' so chords change on the cuts."""
+    pts = [0.0] + [c for c in cuts if 0.5 < c < duration - 0.5] + [duration]
+    return [{'start': round(a, 2), 'end': round(b, 2), 'text': f'[shot {i + 1}]'} for i, (a, b) in enumerate(zip(pts, pts[1:]))]
+
+
+def plan_cues(lines: list[dict], regions: list[dict], duration: float, ai=None, title: str = '', brief: str = '') -> dict:
     """AI cue sheet, validated; falls back to a heuristic plan if the AI is unavailable or wrong."""
     try:
         from .compose import AI, parse_json
         ai = ai or AI.from_env()
-        ask = {'title': title, 'duration': round(duration, 2),
+        ask = {'title': title, 'brief': brief or 'documentary underscore', 'duration': round(duration, 2),
                'regions': [{k: r[k] for k in ('start', 'end', 'kind')} for r in regions],
                'narration': [{'t': ln['start'], 'end': ln['end'], 'text': ln['text'][:300]} for ln in lines]}
         text, _ = ai.chat([{'role': 'system', 'content': DIRECTOR}, {'role': 'user', 'content': json.dumps(ask)}], think=False)
@@ -353,12 +375,12 @@ def compose(sheet: dict, lines: list[dict], regions: list[dict], duration: float
 
 # ---------------------------------------------------------------- 3. render
 def score_film(lines: list[dict], regions: list[dict], duration: float, out_dir: str | Path, title: str = 'Film score',
-               ai=None, render: bool = True, step=lambda s: None) -> dict:
+               ai=None, render: bool = True, step=lambda s: None, brief: str = '') -> dict:
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     lines = merge_lines(lines)
     step('planning cues')
-    sheet = plan_cues(lines, regions, duration, ai=ai, title=title)
+    sheet = plan_cues(lines, regions, duration, ai=ai, title=title, brief=brief)
     (out / 'cue-sheet.json').write_text(json.dumps(sheet, indent=1), encoding='utf-8')
     spec = compose(sheet, lines, regions, duration, title)
     (out / 'score-spec.json').write_text(json.dumps(spec, indent=1), encoding='utf-8')

@@ -89,7 +89,8 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser('stems', help='render one WAV per part (same length, aligned)')
     p.add_argument('flp'); p.add_argument('-o', '--out')
     p = sub.add_parser('film', help='score a video: timed underscore from captions (+ optional preview mix)')
-    p.add_argument('--srt', required=True, help='narration captions with times')
+    p.add_argument('--srt', help='narration captions with times (without it, the scene cuts of the video are used)')
+    p.add_argument('--brief', default='', help='one line on the feel, e.g. "uplifting product promo"')
     p.add_argument('--video', help='the video (for its length and an optional preview mix)')
     p.add_argument('--duration', type=float, help='length in seconds if no --video')
     p.add_argument('--scenes', help='JSON with "scenes" [{start,end,type}] (docv2 props) for intro/title/act/sponsor/end')
@@ -153,7 +154,13 @@ def main(argv: list[str] | None = None) -> int:
                 regions = film.regions_from_scenes(json.loads(Path(a.scenes).read_text(encoding='utf-8'))['scenes'])
             if a.regions:
                 regions += json.loads(Path(a.regions).read_text(encoding='utf-8'))
-            r = film.score_film(film.read_srt(a.srt), regions, dur, a.out, a.title, render=not a.no_render,
+            if a.srt:
+                lines = film.read_srt(a.srt)
+            elif a.video:
+                lines = film.cut_lines(film.scene_cuts(a.video), dur)
+            else:
+                raise ValueError('give --srt (narration captions) or --video (scene cuts are used)')
+            r = film.score_film(lines, regions, dur, a.out, a.title, render=not a.no_render, brief=a.brief,
                                 step=lambda m: print(f'... {m}', file=sys.stderr))
             if a.preview and a.video and r.get('wav'):
                 r['preview'] = str(film.mix_preview(a.video, r['wav'], Path(a.out) / 'preview.mp4'))
