@@ -65,20 +65,21 @@ class AI:
     @classmethod
     def from_env(cls) -> 'AI':
         """P5MIDI_AI_URL / P5MIDI_AI_KEY / P5MIDI_AI_MODEL, or DEEPSEEK_API_KEY / OPENAI_API_KEY."""
-        if os.environ.get('P5MIDI_AI_KEY') or os.environ.get('P5MIDI_AI_URL'):
-            return cls(os.environ.get('P5MIDI_AI_URL', cls.url), os.environ.get('P5MIDI_AI_KEY', ''),
-                       os.environ.get('P5MIDI_AI_MODEL', cls.model))
-        if os.environ.get('DEEPSEEK_API_KEY'):
-            return cls(key=os.environ['DEEPSEEK_API_KEY'], model=os.environ.get('P5MIDI_AI_MODEL', cls.model))
-        if os.environ.get('OPENAI_API_KEY'):
-            return cls('https://api.openai.com/v1/chat/completions', os.environ['OPENAI_API_KEY'],
-                       os.environ.get('P5MIDI_AI_MODEL', 'gpt-4.1'))
+        e = lambda k, d='': os.environ.get(k, d).strip()  # noqa: E731  (keys saved by Notepad can end in a carriage return)
+        if e('P5MIDI_AI_KEY') or e('P5MIDI_AI_URL'):
+            return cls(e('P5MIDI_AI_URL', cls.url), e('P5MIDI_AI_KEY'), e('P5MIDI_AI_MODEL', cls.model))
+        if e('DEEPSEEK_API_KEY'):
+            return cls(key=e('DEEPSEEK_API_KEY'), model=e('P5MIDI_AI_MODEL', cls.model))
+        if e('OPENAI_API_KEY'):
+            return cls('https://api.openai.com/v1/chat/completions', e('OPENAI_API_KEY'), e('P5MIDI_AI_MODEL', 'gpt-4.1'))
         raise ComposeError('No AI configured. Set DEEPSEEK_API_KEY (or P5MIDI_AI_URL + P5MIDI_AI_KEY + '
                            'P5MIDI_AI_MODEL for any OpenAI-compatible endpoint).')
 
-    def chat(self, messages: list[dict]) -> tuple[str, dict]:
+    def chat(self, messages: list[dict], think: bool = True) -> tuple[str, dict]:
         body = {'model': self.model, 'messages': messages, 'temperature': 0.8, 'max_tokens': 8000,
                 'response_format': {'type': 'json_object'}}
+        if not think and 'deepseek' in self.url:  # v4 models can spend the whole budget reasoning; planning doesn't need it
+            body['thinking'] = {'type': 'disabled'}
         req = urllib.request.Request(self.url, data=json.dumps(body).encode(), method='POST', headers={
             'content-type': 'application/json', 'authorization': f'Bearer {self.key}'})
         try:

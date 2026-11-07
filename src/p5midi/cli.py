@@ -12,6 +12,7 @@
   p5midi change <song folder> "darker"  AI revises the latest version
   p5midi studio                         local app: idea box, player, Open in FL Studio
   p5midi stems song.flp                 one WAV per part, same length, for any DAW
+  p5midi film --srt c.srt --video v.mp4 original underscore timed to the narration (+ preview mix)
 """
 from __future__ import annotations
 
@@ -87,6 +88,15 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument('folder'); p.add_argument('instruction'); p.add_argument('--no-render', action='store_true')
     p = sub.add_parser('stems', help='render one WAV per part (same length, aligned)')
     p.add_argument('flp'); p.add_argument('-o', '--out')
+    p = sub.add_parser('film', help='score a video: timed underscore from captions (+ optional preview mix)')
+    p.add_argument('--srt', required=True, help='narration captions with times')
+    p.add_argument('--video', help='the video (for its length and an optional preview mix)')
+    p.add_argument('--duration', type=float, help='length in seconds if no --video')
+    p.add_argument('--scenes', help='JSON with "scenes" [{start,end,type}] (docv2 props) for intro/title/act/sponsor/end')
+    p.add_argument('--regions', help='JSON list [{start,end,kind}] with kind intro|silence|title|act|sponsor|end_card')
+    p.add_argument('--title', default='Film score'); p.add_argument('-o', '--out', default='score')
+    p.add_argument('--no-render', action='store_true'); p.add_argument('--preview', action='store_true',
+                   help='also write <out>/preview.mp4: the video with the score ducked under its audio')
     p = sub.add_parser('studio', help='open the local Studio app in your browser')
     p.add_argument('--port', type=int, default=47390); p.add_argument('--no-browser', action='store_true')
 
@@ -132,6 +142,24 @@ def main(argv: list[str] | None = None) -> int:
         elif a.cmd == 'stems':
             from .stems import export_stems
             _print(export_stems(a.flp, a.out, step=lambda m: print(f'... {m}', file=sys.stderr)))
+        elif a.cmd == 'film':
+            from . import film
+            from .analyze import duration as media_duration
+            dur = a.duration or (media_duration(a.video) if a.video else None)
+            if not dur:
+                raise ValueError('give --video or --duration')
+            regions = []
+            if a.scenes:
+                regions = film.regions_from_scenes(json.loads(Path(a.scenes).read_text(encoding='utf-8'))['scenes'])
+            if a.regions:
+                regions += json.loads(Path(a.regions).read_text(encoding='utf-8'))
+            r = film.score_film(film.read_srt(a.srt), regions, dur, a.out, a.title, render=not a.no_render,
+                                step=lambda m: print(f'... {m}', file=sys.stderr))
+            if a.preview and a.video and r.get('wav'):
+                r['preview'] = str(film.mix_preview(a.video, r['wav'], Path(a.out) / 'preview.mp4'))
+            r['cue_sheet'] = {'key': r['cue_sheet']['key'], 'source': r['cue_sheet']['source'],
+                              'cues': len(r['cue_sheet']['cues']), 'hits': r['cue_sheet']['hits']}
+            _print(r)
         elif a.cmd == 'studio':
             from .studio import main as studio_main
             studio_main(a.port, not a.no_browser)
