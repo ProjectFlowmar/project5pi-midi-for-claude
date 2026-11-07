@@ -9,6 +9,8 @@ FL Studio's command line, masters it, and measures the result, so an AI that
 cannot hear still gets told "the intro is louder than the drop" or "the mix is
 13 dB bass-heavy" and can fix it.
 
+**Not a terminal person?** A one-click desktop app (type an idea, click Make; free for 5 songs a month) is in the works: [join the waitlist](https://project5pi.com/midi/?ref=github).
+
 No clicking, no MIDI loopback driver, no controller script. The `.flp` opens in FL
 Studio with every note, pattern and playlist clip editable.
 
