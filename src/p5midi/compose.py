@@ -47,6 +47,16 @@ Make it sound produced:
 - Melody: a 2-bar motif, then a varied answer; mostly stepwise; land on chord tones; 4-bar phrases.
 - Balance: pads and arps quieter ("velocity" 0.5-0.7) than drums, bass and the lead.
 - Pick a tempo and key that fit the genre unless the idea says otherwise.
+
+Hip-hop specifics (from Computer Music's hip-hop production tips):
+- Fewer elements hit harder: build the core on 2-3 parts (drums, bass, one sparse keys/sample idea); add
+  others only for contrast.
+- Let the beat build: start with drums alone or drums + one element, add a part each section, and change the
+  drum pattern in later sections so the track evolves for the MC.
+- Grid first, then feel: write on the 16-step grid and use "humanize" 0.15-0.35 instead of loose timing.
+- Horns: layer a fast, high line over a slower, lower one (two parts) when the idea calls for energy.
+- One unusual "soundbomb" texture (a percussive or found sound) used sparingly can make a beat memorable.
+- Inspired by a producer is fine; never copy a known melody, riff or sample. Original parts only.
 """
 
 
