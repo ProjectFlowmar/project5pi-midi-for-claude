@@ -152,7 +152,31 @@ def _system(catalog: dict, max_bars: int) -> str:
             json.dumps(catalog, indent=1) + '\n\n## Spec format\n' + _spec_doc())
 
 
-def _validated(ai: AI, messages: list[dict], max_seconds, tries: int = 3) -> tuple[dict, dict]:
+def catalog_check(catalog: dict):
+    """A validator for machines without the templates (the hosted service): names must match the catalog."""
+    def check(spec: dict) -> None:
+        tpl = spec.get('template')
+        if tpl not in catalog:
+            raise SpecError(f'"template" must be one of: {", ".join(catalog)}')
+        names = {c['channel'] for c in catalog[tpl]}
+        parts = spec.get('parts') or {}
+        if not parts:
+            raise SpecError('spec needs "parts"')
+        from .song import PART_TYPES
+        for n, p in parts.items():
+            if p.get('type') not in PART_TYPES:
+                raise SpecError(f'part {n!r}: "type" must be one of {", ".join(PART_TYPES)}')
+            if p.get('channel') not in names:
+                raise SpecError(f'part {n!r}: no channel named {p.get("channel")!r} in {tpl}. '
+                                f'Channels: {", ".join(sorted(names))}')
+        for sec in spec.get('arrangement') or []:
+            for pn in sec.get('parts', []):
+                if pn not in parts:
+                    raise SpecError(f'section {sec.get("name", "?")!r} uses unknown part {pn!r}')
+    return check
+
+
+def _validated(ai: AI, messages: list[dict], max_seconds, tries: int = 3, validate=None) -> tuple[dict, dict]:
     usage_total = {'prompt_tokens': 0, 'completion_tokens': 0}
     last_err = None
     for _ in range(tries):
@@ -161,7 +185,7 @@ def _validated(ai: AI, messages: list[dict], max_seconds, tries: int = 3) -> tup
             usage_total[k] += int(usage.get(k, 0) or 0)
         try:
             spec = enforce_length(parse_json(text), max_seconds)
-            build(spec)  # raises SpecError on a bad channel, part, grid...
+            (validate or build)(spec)  # raises SpecError on a bad channel, part, grid...
             return spec, usage_total
         except (ComposeError, SpecError, ValueError, KeyError, TypeError) as e:
             last_err = e
@@ -173,7 +197,7 @@ def _validated(ai: AI, messages: list[dict], max_seconds, tries: int = 3) -> tup
 
 
 def compose(idea: str, ai: AI | None = None, max_seconds: float | None = None,
-            catalog: dict | None = None) -> tuple[dict, dict]:
+            catalog: dict | None = None, validate=None) -> tuple[dict, dict]:
     """Returns (spec, token usage)."""
     ai = ai or AI.from_env()
     catalog = catalog or template_catalog()
@@ -181,11 +205,12 @@ def compose(idea: str, ai: AI | None = None, max_seconds: float | None = None,
     messages = [{'role': 'system', 'content': _system(catalog, max_bars)},
                 {'role': 'user', 'content': json.dumps({'idea': idea.strip()[:2000],
                  'length': f'about {int(max_seconds)} seconds' if max_seconds else '1.5 to 3 minutes'})}]
-    return _validated(ai, messages, max_seconds)
+    return _validated(ai, messages, max_seconds, validate=validate)
 
 
 def revise(spec: dict, instruction: str, ai: AI | None = None, max_seconds: float | None = None,
-           catalog: dict | None = None, analysis_notes: list[str] | None = None) -> tuple[dict, dict]:
+           catalog: dict | None = None, analysis_notes: list[str] | None = None,
+           validate=None) -> tuple[dict, dict]:
     """Change an existing song: 'more energy', 'darker', 'simpler drums', or mix notes from analyze()."""
     ai = ai or AI.from_env()
     catalog = catalog or template_catalog([spec.get('template', 'Basic')] + CURATED)
@@ -197,4 +222,11 @@ def revise(spec: dict, instruction: str, ai: AI | None = None, max_seconds: floa
         ask['how_to_fix_mix'] = 'Adjust part "velocity", move parts between sections, or simplify parts.'
     messages = [{'role': 'system', 'content': _system(catalog, max_bars)},
                 {'role': 'user', 'content': json.dumps(ask)}]
-    return _validated(ai, messages, max_seconds)
+    return _validated(ai, messages, max_seconds, validate=validate)
+
+
+def fix(spec: dict, error: str, ai: AI | None = None, max_seconds: float | None = None,
+        catalog: dict | None = None, validate=None) -> tuple[dict, dict]:
+    """Repair a spec that failed to build on the user's machine (hosted flow)."""
+    return revise(spec, f'This spec failed to build with this error: {error[:600]}. Fix only that.',
+                  ai=ai, max_seconds=max_seconds, catalog=catalog, validate=validate)

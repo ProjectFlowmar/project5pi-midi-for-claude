@@ -14,6 +14,21 @@ from typing import Callable
 
 from .compose import AI, compose, revise
 
+
+def _compose(idea, ai, max_seconds):
+    from .remote import Hosted
+    if isinstance(ai, Hosted):
+        return ai.compose(idea, max_seconds)
+    return compose(idea, ai=ai, max_seconds=max_seconds)
+
+
+def _revise(spec, instruction, ai, max_seconds, notes=None, autofix=False):
+    from .remote import Hosted
+    if isinstance(ai, Hosted):
+        return ai.revise(spec, instruction, max_seconds, analysis_notes=notes, autofix=autofix)
+    return revise(spec, instruction, ai=ai, max_seconds=max_seconds, analysis_notes=notes)
+
+
 Step = Callable[[str], None]
 
 
@@ -39,7 +54,7 @@ def create(idea: str, out_dir: str | Path = 'songs', ai: AI | None = None, max_s
            fix: bool = True, render: bool = True, step: Step = lambda s: None) -> dict:
     t0 = time.time()
     step('writing the song')
-    spec, usage = compose(idea, ai=ai, max_seconds=max_seconds)
+    spec, usage = _compose(idea, ai, max_seconds)
     folder = Path(out_dir) / f"{time.strftime('%Y%m%d-%H%M%S')}-{_slug(spec.get('title') or idea)}"
     folder.mkdir(parents=True, exist_ok=True)
     (folder / 'idea.txt').write_text(idea, encoding='utf-8')
@@ -48,8 +63,7 @@ def create(idea: str, out_dir: str | Path = 'songs', ai: AI | None = None, max_s
     history = [{'step': 'compose', 'notes': _notes(rep)}]
     if fix and render and _notes(rep):
         step('fixing the mix: ' + '; '.join(n.split('.')[0] for n in _notes(rep))[:160])
-        spec, u2 = revise(spec, 'Fix the mix problems listed.', ai=ai, max_seconds=max_seconds,
-                          analysis_notes=_notes(rep))
+        spec, u2 = _revise(spec, 'Fix the mix problems listed.', ai, max_seconds, _notes(rep), autofix=True)
         usage = {k: usage.get(k, 0) + u2.get(k, 0) for k in usage}
         rep = _make(spec, folder, name, step, render)
         history.append({'step': 'auto-fix', 'notes': _notes(rep)})
@@ -69,7 +83,7 @@ def change(folder: str | Path, instruction: str, ai: AI | None = None, max_secon
     base = max(specs, key=lambda p: p.stat().st_mtime)
     spec = json.loads(base.read_text(encoding='utf-8'))
     step(f'changing: {instruction[:80]}')
-    spec, usage = revise(spec, instruction, ai=ai, max_seconds=max_seconds)
+    spec, usage = _revise(spec, instruction, ai, max_seconds)
     stem = re.sub(r'-v\d+$', '', base.stem)
     n = 2
     while (folder / f'{stem}-v{n}.json').exists():

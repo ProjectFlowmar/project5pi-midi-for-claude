@@ -27,9 +27,16 @@ def config_path() -> Path:
 
 def load_config() -> dict:
     try:
-        return json.loads(config_path().read_text(encoding='utf-8'))
+        cfg = json.loads(config_path().read_text(encoding='utf-8'))
     except (OSError, ValueError):
-        return {}
+        cfg = {}
+    if not cfg.get('device'):  # anonymous id for the free tier; not tied to anything personal
+        cfg['device'] = uuid.uuid4().hex
+        try:
+            save_config(cfg)
+        except OSError:
+            pass
+    return cfg
 
 
 def save_config(cfg: dict) -> None:
@@ -42,11 +49,37 @@ def out_dir(cfg: dict) -> Path:
     return Path(cfg.get('out_dir') or Path.home() / 'Music' / 'P5 MIDI Studio')
 
 
+def own_key(cfg: dict) -> bool:
+    return bool(cfg.get('ai_key') or os.environ.get('DEEPSEEK_API_KEY') or os.environ.get('P5MIDI_AI_KEY')
+                or os.environ.get('OPENAI_API_KEY'))
+
+
 def make_ai(cfg: dict):
+    """Your own AI key if you set one; otherwise the hosted Project5pi service (free tier or license)."""
     from .compose import AI
+    from .remote import Hosted
     if cfg.get('ai_key'):
         return AI(cfg.get('ai_url') or AI.url, cfg['ai_key'], cfg.get('ai_model') or AI.model)
-    return AI.from_env()
+    if own_key(cfg):
+        return AI.from_env()
+    return Hosted(cfg['device'], cfg.get('license', ''), cfg.get('server', ''))
+
+
+_HOSTED = {'at': 0, 'data': None}
+
+
+def hosted_info(cfg: dict, fresh: bool = False) -> dict:
+    """Plans + this device's status from the service, cached 60 s. {'reachable': False} if it is down."""
+    if not fresh and _HOSTED['data'] is not None and time.time() - _HOSTED['at'] < 60:
+        return _HOSTED['data']
+    from .remote import Hosted
+    h = Hosted(cfg['device'], cfg.get('license', ''), cfg.get('server', ''))
+    try:
+        info = {'reachable': True, 'plans': h.plans(), 'status': h.status()}
+    except Exception as e:
+        info = {'reachable': False, 'error': str(e)[:200]}
+    _HOSTED.update(at=time.time(), data=info)
+    return info
 
 
 class Jobs:
@@ -150,9 +183,12 @@ class Handler(BaseHTTPRequestHandler):
                 fl = str(find_fl_exe())
             except FLNotFound:
                 fl = ''
-            has_ai = bool(cfg.get('ai_key') or os.environ.get('DEEPSEEK_API_KEY') or os.environ.get('P5MIDI_AI_KEY')
-                          or os.environ.get('OPENAI_API_KEY'))
+            mine = own_key(cfg)
+            hosted = None if mine else hosted_info(cfg, fresh='fresh' in (urlparse(self.path).query or ''))
+            has_ai = mine or bool(hosted and hosted.get('reachable'))
             return self._send(200, {'version': __version__, 'ai': has_ai, 'fl': fl,
+                                    'mode': 'own' if mine else 'hosted', 'hosted': hosted,
+                                    'license_set': bool(cfg.get('license')),
                                     'ffmpeg': bool(shutil.which('ffmpeg')), 'out_dir': str(out_dir(cfg)),
                                     'busy': JOBS.busy, 'songs': list_songs(out_dir(cfg))})
         if path.startswith('/api/job/'):
@@ -180,7 +216,10 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         try:
             if path == '/api/settings':
-                for k in ('ai_key', 'ai_url', 'ai_model', 'out_dir'):
+                if 'license' in body:
+                    body['license'] = str(body['license']).strip().upper()
+                    _HOSTED['data'] = None
+                for k in ('ai_key', 'ai_url', 'ai_model', 'out_dir', 'license'):
                     if k in body:
                         v = str(body[k]).strip()
                         if v:
@@ -196,7 +235,12 @@ class Handler(BaseHTTPRequestHandler):
                     return self._send(400, {'error': 'Describe the song first.'})
                 secs = float(body['seconds']) if body.get('seconds') else None
                 ai = make_ai(cfg)
-                jid = JOBS.start(lambda step: create(idea, out_dir(cfg), ai=ai, max_seconds=secs, step=step))
+                def job(step):
+                    try:
+                        return create(idea, out_dir(cfg), ai=ai, max_seconds=secs, step=step)
+                    finally:
+                        _HOSTED['data'] = None  # songs-left changed
+                jid = JOBS.start(job)
                 return self._send(200, {'job': jid})
             if path == '/api/change':
                 from .app import change
@@ -206,6 +250,11 @@ class Handler(BaseHTTPRequestHandler):
                 ai = make_ai(cfg)
                 jid = JOBS.start(lambda step: change(out_dir(cfg) / song, instr, ai=ai, step=step))
                 return self._send(200, {'job': jid})
+            if path == '/api/portal':
+                from .remote import Hosted
+                url = Hosted(cfg['device'], cfg.get('license', ''), cfg.get('server', '')).portal()
+                webbrowser.open(url)
+                return self._send(200, {'ok': True})
             if path == '/api/open':
                 song, name = str(body.get('song', '')), str(body.get('name', ''))
                 if not SAFE.match(song) or (name and not SAFE.match(name)):

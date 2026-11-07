@@ -35,6 +35,7 @@ textarea:focus,input:focus,select:focus{outline:3px solid var(--mint);outline-of
 .chip:hover{background:#d3efe7}
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px}
 .row select{width:auto;min-width:170px}
+.plan .spacer{flex:1}
 .banner{background:var(--warn-pale);border:1px solid #F3D9A8;color:#7A3E06;border-radius:10px;padding:16px 18px}
 .banner b{color:#5A2E04}
 .banner ul{margin:8px 0 0 18px}
@@ -63,6 +64,10 @@ audio{width:100%;margin:14px 0 6px}
 .change{display:flex;gap:8px;margin-top:10px}
 .change input{flex:1}
 .empty{color:var(--muted);text-align:center;padding:36px}
+.plan{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--rule);border-radius:10px;padding:14px 18px}
+.plan b{font-weight:700}.plan .sub{margin:0}
+.plan .btn{min-height:38px;padding:8px 14px;font-size:13px}
+a.btn{text-decoration:none}
 dialog{border:0;border-radius:10px;padding:24px;max-width:520px;width:calc(100% - 32px)}
 dialog::backdrop{background:rgba(13,16,15,.5)}
 dialog label{display:grid;gap:6px;font-weight:600;font-size:14px;margin-top:14px}
@@ -75,6 +80,7 @@ dialog small{font-weight:400;color:var(--muted)}
   <span class="mono" id="ver" style="font-size:12px;color:#8C948F"></span><button class="btn ghost" id="openSettings">Settings</button></div></header>
 <main>
   <div class="banner" id="setup" hidden></div>
+  <div class="plan" id="plan" hidden></div>
 
   <section class="card">
     <h1>What should we make?</h1>
@@ -94,7 +100,9 @@ dialog small{font-weight:400;color:var(--muted)}
 
 <dialog id="settings">
   <h2>Settings</h2>
-  <p class="sub">Your key is saved only on this computer and sent only to the AI service you choose.</p>
+  <p class="sub">Keys are saved only on this computer.</p>
+  <label>License key <small>From your purchase email (P5M-....). Unlocks unlimited songs.</small><input id="lic" autocomplete="off" placeholder="P5M-XXXX-XXXX-XXXX-XXXX"></label>
+  <p class="sub" style="margin-top:18px"><b>Advanced:</b> use your own AI key instead of the Project5pi service (no limits, you pay the AI provider).</p>
   <label>AI key <small>DeepSeek key (platform.deepseek.com). Leave blank to keep the current one.</small><input id="aiKey" type="password" autocomplete="off" placeholder="sk-..."></label>
   <label>AI address <small>Optional. Any OpenAI-compatible chat endpoint. Blank = DeepSeek.</small><input id="aiUrl" placeholder="https://api.deepseek.com/v1/chat/completions"></label>
   <label>Model <small>Optional. Blank = deepseek-v4-flash.</small><input id="aiModel" placeholder="deepseek-v4-flash"></label>
@@ -113,11 +121,24 @@ async function api(path,body){const r=await fetch(path,body?{method:'POST',heade
 EX.forEach(e=>{const b=document.createElement('button');b.className='chip';b.textContent=e.split(',')[0];b.title=e;b.onclick=()=>{$('#idea').value=e;$('#idea').focus()};$('#examples').appendChild(b)});
 
 function setup(){const m=[];
-  if(!state.ai)m.push('<li><b>Add an AI key</b> in Settings (a DeepSeek key costs about half a cent per song).</li>');
+  if(!state.ai)m.push(state.mode==='hosted'?'<li><b>The Project5pi service is not reachable right now.</b> Check your internet, or add your own AI key in Settings.</li>':'<li><b>Add an AI key</b> in Settings.</li>');
   if(!state.fl)m.push('<li><b>FL Studio not found.</b> Install FL Studio 20.7 or newer. Without it you still get the project and MIDI files, but no audio.</li>');
   if(!state.ffmpeg)m.push('<li><b>ffmpeg not found.</b> Needed for mastering and the mix check. Install with <span class="mono">winget install ffmpeg</span>.</li>');
   $('#setup').hidden=!m.length;$('#setup').innerHTML='<b>Before your first song:</b><ul>'+m.join('')+'</ul>';
-  $('#make').disabled=!state.ai||state.busy}
+  $('#make').disabled=!state.ai||state.busy;
+  const P=$('#plan');P.hidden=false;
+  if(state.mode==='own'){P.innerHTML='<span class="sub">Using your own AI key. No limits.</span>';return}
+  const h=state.hosted||{};if(!h.reachable){P.hidden=true;return}
+  const st=h.status||{},pl=h.plans||{};
+  if(st.plan==='paid'){const d=st.license&&st.license.renews?new Date(st.license.renews*1000).toLocaleDateString():'';
+    P.innerHTML=`<b>Unlimited plan</b><span class="sub">${d?'Renews '+esc(d):''}</span><span class="spacer"></span><button class="btn line" id="portal">Manage plan</button>`;
+    $('#portal').onclick=()=>api('/api/portal',{}).catch(alertMsg);return}
+  let html=`<b>Free plan</b><span class="sub">${st.left} of ${pl.free?pl.free.songs_per_month:5} songs left this month · up to 1 minute each</span><span class="spacer"></span>`;
+  if(pl.selling){html+=`<a class="btn fill" href="${esc(pl.monthly.url)}" target="_blank" rel="noopener">Unlimited: $5/month</a><a class="btn line" href="${esc(pl.yearly.url)}" target="_blank" rel="noopener">$39/year${pl.yearly.founding_left>0?' · '+pl.yearly.founding_left+' founding spots':''}</a>`}
+  if(state.license_set&&st.license&&!st.license.valid)html+='<span class="sub" style="color:var(--bad)">Your license is not active.</span>';
+  html+='<button class="btn line" id="enterKey">Enter license key</button>';
+  P.innerHTML=html;$('#enterKey').onclick=()=>$('#openSettings').click();
+  const free=st.plan!=='paid';[...$('#len').options].forEach(o=>{o.disabled=free&&(o.value===''||+o.value>60)});if(free)$('#len').value='60'}
 
 function meter(secs){if(!secs||!secs.length)return'';const v=secs.map(s=>s[1]).filter(x=>x!=null);const lo=Math.min(...v)-3,hi=Math.max(...v);
   return '<div class="lbl">Loudness by section</div><div class="meter">'+secs.map(([n,l])=>`<div><b>${esc(n)}</b><i style="width:${l==null?0:Math.max(6,Math.round((l-lo)/(hi-lo||1)*100))}%"></i><span class="mono">${l??'-'}</span></div>`).join('')+'</div>'}
@@ -147,12 +168,12 @@ function render(){const box=$('#songs');
 
 function alertMsg(e){$('#job').hidden=false;$('#jobErr').hidden=false;$('#jobErr').textContent=e.message||e}
 
-async function load(){state=await api('/api/state');$('#ver').textContent='v'+state.version;setup();render()}
+async function load(fresh){state=await api('/api/state'+(fresh?'?fresh=1':''));$('#ver').textContent='v'+state.version;setup();render()}
 
 async function run(path,body){$('#job').hidden=false;$('#jobErr').hidden=true;$('#steps').innerHTML='<li><span class="spin"></span><span>starting</span></li>';$('#make').disabled=true;
   document.querySelectorAll('[data-change],[data-go]').forEach(b=>b.disabled=true);
   window.scrollTo({top:0,behavior:'smooth'});
-  try{const {job}=await api(path,body);await poll(job)}catch(e){alertMsg(e)}finally{await load()}}
+  try{const {job}=await api(path,body);await poll(job)}catch(e){alertMsg(e)}finally{await load(true)}}
 
 async function poll(id){for(;;){const j=await api('/api/job/'+id);
   $('#steps').innerHTML=j.steps.map((s,i)=>`<li><span class="t mono">${s.t}s</span>${i===j.steps.length-1&&j.status==='running'?'<span class="spin"></span>':'<span>✓</span>'}<span>${esc(s.text)}</span></li>`).join('');
@@ -163,8 +184,8 @@ async function poll(id){for(;;){const j=await api('/api/job/'+id);
 $('#make').onclick=()=>{const idea=$('#idea').value.trim();if(idea.length<3){$('#idea').focus();return}run('/api/create',{idea,seconds:$('#len').value})};
 $('#openSettings').onclick=()=>{$('#outDir').value=state?state.out_dir:'';$('#settings').showModal()};
 $('#closeSettings').onclick=()=>$('#settings').close();
-$('#saveSettings').onclick=async()=>{const b={out_dir:$('#outDir').value,ai_url:$('#aiUrl').value,ai_model:$('#aiModel').value};if($('#aiKey').value.trim())b.ai_key=$('#aiKey').value.trim();
-  try{await api('/api/settings',b);$('#aiKey').value='';$('#settings').close();await load()}catch(e){alertMsg(e)}};
+$('#saveSettings').onclick=async()=>{const b={out_dir:$('#outDir').value,ai_url:$('#aiUrl').value,ai_model:$('#aiModel').value};if($('#aiKey').value.trim())b.ai_key=$('#aiKey').value.trim();if($('#lic').value.trim())b.license=$('#lic').value.trim();
+  try{await api('/api/settings',b);$('#aiKey').value='';$('#lic').value='';$('#settings').close();await load(true)}catch(e){alertMsg(e)}};
 load();
 </script>
 </body>
