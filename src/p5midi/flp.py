@@ -59,6 +59,7 @@ EV_PLAYLIST = 233
 EV_TRACK_DATA = 238
 EV_TRACK_NAME = 239
 EV_MIXER_SLOT = 98
+EV_ROUTED_TO = 143  # channel -> mixer insert (0 = master)
 EV_INSERT_FLAGS = 236
 
 PATTERN_BASE = 20480  # playlist item_index = PATTERN_BASE + pattern id
@@ -286,6 +287,69 @@ class Project:
                 elif eid == EV_SAMPLE_PATH and not cur.sample:
                     cur.sample = _utf16(d)
         return out
+
+    # ---------- channel blocks (kits) ----------
+    def _channel_section_end(self) -> int:
+        return next((i for i, e in enumerate(self.events) if e[0] in (EV_MIXER_SLOT, EV_INSERT_FLAGS, EV_ARRANGEMENT_NEW)),
+                    len(self.events))
+
+    def channel_blocks(self) -> list[tuple[int, list[list]]]:
+        """[(channel id, events)] for every channel; pattern events interleaved by FL are left out."""
+        end = self._channel_section_end()
+        starts = [i for i, e in enumerate(self.events[:end]) if e[0] == EV_CHANNEL_NEW]
+        out = []
+        for n, a in enumerate(starts):
+            b = starts[n + 1] if n + 1 < len(starts) else end
+            block = [list(e) for e in self.events[a:b] if e[0] not in (EV_PATTERN_NEW, EV_PATTERN_NAME, EV_NOTES)]
+            out.append((struct.unpack('<H', self.events[a][1])[0], block))
+        return out
+
+    def _set_channel_count(self) -> None:
+        n = sum(1 for e in self.events if e[0] == EV_CHANNEL_NEW)
+        self.header = self.header[:2] + struct.pack('<H', n) + self.header[4:]
+
+    def add_channel_block(self, block: list[list], name: str | None = None, sample: str | None = None,
+                          route: int | None = 0) -> int:
+        """Append a copy of a channel's events as a new channel. Returns the new channel id."""
+        new_id = max([cid for cid, _ in self.channel_blocks()] or [-1]) + 1
+        blk = [list(e) for e in block]
+        blk[0] = [EV_CHANNEL_NEW, struct.pack('<H', new_id)]
+        for e in blk:
+            if name is not None and e[0] == EV_CHANNEL_NAME:
+                e[1] = _to_utf16(name)
+            elif sample is not None and e[0] == EV_SAMPLE_PATH:
+                e[1] = _to_utf16(str(sample).replace('/', '\\'))
+            elif route is not None and e[0] == EV_ROUTED_TO:
+                e[1] = struct.pack('<i', route)
+        if name is not None and not any(e[0] == EV_CHANNEL_NAME for e in blk):
+            blk.insert(1, [EV_CHANNEL_NAME, _to_utf16(name)])
+        i = self._channel_section_end()
+        self.events[i:i] = blk
+        self._set_channel_count()
+        return new_id
+
+    def sampler_block(self) -> list[list] | None:
+        """A plain Sampler channel to clone (has a sample path, no plugin)."""
+        for _, blk in self.channel_blocks():
+            plugin = next((e[1] for e in blk if e[0] == EV_PLUGIN_INTERNAL), b'')
+            if any(e[0] == EV_SAMPLE_PATH for e in blk) and _utf16(plugin) == '':
+                return blk
+        return None
+
+    def add_sampler(self, name: str, sample: str | Path, donor: 'Project | None' = None, route: int = 0) -> int:
+        """New channel that plays one audio file (pitched by key, like FL's Sampler)."""
+        blk = (donor.sampler_block() if donor else None) or self.sampler_block()
+        if blk is None:
+            raise FLPError('no Sampler channel to copy; pass a donor project such as the Basic template')
+        if not Path(sample).is_file():
+            raise FLPError(f'sample not found: {sample}')
+        return self.add_channel_block(blk, name=name, sample=str(Path(sample).resolve()), route=route)
+
+    def copy_channel_from(self, other: 'Project', channel: str, name: str | None = None, route: int = 0) -> int:
+        """Copy an instrument channel (plugin + its settings) from another project."""
+        ch = other.find_channel(channel)
+        blk = next(b for cid, b in other.channel_blocks() if cid == ch.id)
+        return self.add_channel_block(blk, name=name or ch.label, route=route)
 
     def find_channel(self, name: str | int) -> Channel:
         chans = self.channels()

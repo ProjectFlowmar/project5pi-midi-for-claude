@@ -241,6 +241,31 @@ def build(spec_in, template: str | Path | None = None) -> BuildResult:
         proj.clear_track_names()
         proj.clear_markers()
 
+    # kit: add channels before parts look them up
+    #   {"name": "Kick", "sample": "D:/Samples/kick.wav", "root": "C5"}   new Sampler channel (root = the sample's pitch)
+    #   {"name": "Keys", "from": "Chillout", "channel": "Piano"}          instrument copied from another template
+    root_shift: dict[int, int] = {}
+    kit = spec.get('kit') or {}
+    kit_channels = kit.get('channels', []) if isinstance(kit, dict) else kit
+    if kit_channels:
+        # always clone a plain Sampler from the donor (Basic's 808 Kick): a template's own samplers can carry
+        # reverse, low volume or odd envelopes (HipHop-Trap's "Reverse Crash" made short hits silent)
+        donor = Project.load(find_template(kit.get('donor', 'Basic') if isinstance(kit, dict) else 'Basic'))
+        others: dict[str, Project] = {}
+        for k in kit_channels:
+            try:
+                if k.get('sample'):
+                    cid = proj.add_sampler(k['name'], k['sample'], donor=donor)
+                    if k.get('root') is not None:
+                        root_shift[cid] = 60 - theory.note_number(k['root'])
+                elif k.get('from'):
+                    src = others.setdefault(k['from'], Project.load(find_template(k['from'])))
+                    proj.copy_channel_from(src, k['channel'], name=k.get('name'))
+                else:
+                    raise SpecError(f'kit channel {k.get("name")!r} needs "sample" or "from" + "channel"')
+            except FLPError as e:
+                raise SpecError(f'kit channel {k.get("name")!r}: {e}') from None
+
     parts_spec = spec.get('parts') or {}
     if not parts_spec:
         raise SpecError('spec needs "parts"')
@@ -252,6 +277,8 @@ def build(spec_in, template: str | Path | None = None) -> BuildResult:
             ch = proj.find_channel(part['channel'])
         except FLPError as e:
             raise SpecError(f'part {name!r}: {e}') from None
+        if ch.id in root_shift:  # a sample recorded at another pitch: shift so notes sound where written
+            part = {**part, 'transpose': int(part.get('transpose', 0)) + root_shift[ch.id]}
         notes, bars = _part_notes(name, part, spec, ppq, ch.id)
         if part.get('humanize') or part.get('swing', spec.get('swing')):
             theory.humanize(notes, float(part.get('humanize', 0)), ppq, seed=zlib.crc32(name.encode()),

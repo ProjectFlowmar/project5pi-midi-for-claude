@@ -111,6 +111,25 @@ only, a small integer = scale degree in `key` at `octave` (1 = tonic, 8 = tonic
 an octave up, 0 and negatives go down). Rows can also be objects:
 `{"beat": 0, "degree": 5, "length": 1, "velocity": 100}`.
 
+## Kit: your own sounds
+
+Add channels to the template before the parts use them:
+
+```json
+"kit": {"channels": [
+  {"name": "Kick", "sample": "D:/Music Production/Samples/Kick 03.wav"},
+  {"name": "Moog Bass", "sample": "D:/Music Production/Samples/Moog_Bass_E1.wav", "root": "E1"},
+  {"name": "Grand Piano", "from": "Chillout", "channel": "Piano"}
+]}
+```
+
+- `sample`: a new Sampler channel that plays that file. One-shots (drums) play on
+  any note; use lane `"60"`. For pitched samples give `root`, the note the sample was
+  recorded at, and parts on that channel sound at the pitches you write.
+- `from` + `channel`: copies an instrument channel (plugin and settings) from another
+  template.
+- New channels play through the master. Use them in parts by `name`.
+
 ## Arrangement
 
 ```json

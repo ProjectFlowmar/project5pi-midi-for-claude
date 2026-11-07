@@ -1,0 +1,201 @@
+{
+  "title": "Sunset Boulevard",
+  "comment": "West Coast / G-funk style instrumental. Original composition. Samples: MusicRadar SampleRadar (royalty-free).",
+  "template": "HipHop-Trap",
+  "bpm": 92,
+  "key": "E harmonic_minor",
+  "progression": ["i", "VI", "iv", "V"],
+  "swing": 0.18,
+  "kit": {
+    "donor": "Basic",
+    "channels": [
+      {
+        "name": "WC Kick",
+        "sample": "D:/Music Production/Samples/MusicRadar/Hip-Hop Essentials/Drum Hits/Kcks/Kick 03.wav"
+      },
+      {
+        "name": "WC Snare",
+        "sample": "D:/Music Production/Samples/MusicRadar/Hip-Hop Essentials/Drum Hits/Snares/Snare 34.wav"
+      },
+      {
+        "name": "WC Clap",
+        "sample": "D:/Music Production/Samples/MusicRadar/Hip-Hop Essentials/Drum Hits/Claps/Clap 18.wav"
+      },
+      {
+        "name": "WC Hat",
+        "sample": "D:/Music Production/Samples/MusicRadar/Hip-Hop Essentials/Drum Hits/Hats/Hat 17.wav"
+      },
+      {
+        "name": "Moog Bass",
+        "sample": "D:/Music Production/Samples/MusicRadar/90s Hip-Hop/Multis/Moog_Bass/Moog_Bass_E1.wav",
+        "root": "E1"
+      },
+      {
+        "name": "Grand Piano",
+        "from": "Chillout",
+        "channel": "Piano"
+      },
+      {
+        "name": "Strings",
+        "from": "Chillout",
+        "channel": "Strings"
+      }
+    ]
+  },
+  "parts": {
+    "kick": {
+      "type": "drums",
+      "channel": "WC Kick",
+      "bars": 2,
+      "lanes": {
+        "60": "X.........X.x... X.....x...X....."
+      },
+      "humanize": 0.25
+    },
+    "snare": {
+      "type": "drums",
+      "channel": "WC Snare",
+      "bars": 2,
+      "lanes": {
+        "60": "....X.......X... ....X.......X..g"
+      },
+      "humanize": 0.2
+    },
+    "clap": {
+      "type": "drums",
+      "channel": "WC Clap",
+      "bars": 2,
+      "lanes": {
+        "60": "....x.......x... ....x.......x..."
+      },
+      "velocity": 0.9
+    },
+    "hat": {
+      "type": "drums",
+      "channel": "WC Hat",
+      "bars": 2,
+      "lanes": {
+        "60": "x.o.x.o.x.o.x.ox x.o.x.oxx.o.x.o."
+      },
+      "velocity": 1.0,
+      "humanize": 0.35
+    },
+    "bass": {
+      "type": "notes",
+      "channel": "Moog Bass",
+      "bars": 4,
+      "notes": [
+        [0, "E1", 1.5, 110],
+        [1.75, "E1", 0.25, 90],
+        [2.5, "B1", 0.5, 95],
+        [3, "E2", 0.75, 100],
+        [4, "C2", 1.5, 110],
+        [5.75, "C2", 0.25, 90],
+        [6.5, "G1", 0.5, 95],
+        [7, "C2", 0.75, 100],
+        [8, "A1", 1.5, 110],
+        [9.75, "A1", 0.25, 90],
+        [10.5, "E1", 0.5, 95],
+        [11, "A1", 0.75, 100],
+        [12, "B1", 1.5, 110],
+        [13.75, "B1", 0.25, 90],
+        [14.5, "D#2", 0.5, 95],
+        [15, "F#2", 0.75, 100]
+      ]
+    },
+    "piano": {
+      "type": "notes",
+      "channel": "Grand Piano",
+      "bars": 4,
+      "humanize": 0.15,
+      "notes": [
+        [0, "E4", 0.5, 100],
+        [0, "E5", 0.5, 92],
+        [0.75, "E5", 0.25, 80],
+        [1.5, "G5", 0.5, 95],
+        [2, "B4", 0.5, 92],
+        [2, "B5", 0.5, 85],
+        [3, "E5", 0.5, 88],
+        [4, "E4", 0.5, 100],
+        [4, "E5", 0.5, 92],
+        [4.75, "E5", 0.25, 80],
+        [5.5, "G5", 0.5, 95],
+        [6, "C5", 0.5, 92],
+        [6, "C6", 0.5, 85],
+        [7, "E5", 0.5, 88],
+        [8, "E4", 0.5, 100],
+        [8, "E5", 0.5, 92],
+        [8.75, "E5", 0.25, 80],
+        [9.5, "A5", 0.5, 95],
+        [10, "C5", 0.5, 92],
+        [10, "C6", 0.5, 85],
+        [11, "E5", 0.5, 88],
+        [12, "D#4", 0.5, 100],
+        [12, "D#5", 0.5, 92],
+        [12.75, "D#5", 0.25, 80],
+        [13.5, "F#5", 0.5, 95],
+        [14, "B4", 0.5, 92],
+        [14, "B5", 0.5, 85],
+        [15, "F#5", 0.5, 88]
+      ]
+    },
+    "strings": {
+      "type": "chords",
+      "channel": "Strings",
+      "octave": 3,
+      "velocity": 0.55
+    },
+    "lead": {
+      "type": "notes",
+      "channel": "Synth 1",
+      "bars": 4,
+      "velocity": 0.75,
+      "notes": [
+        [0, "B5", 1.5],
+        [1.5, "G5", 0.5],
+        [2, "E5", 2],
+        [4, "E6", 1.5],
+        [5.5, "D#6", 0.5],
+        [6, "B5", 2],
+        [8, "C6", 1.5],
+        [9.5, "B5", 0.5],
+        [10, "A5", 2],
+        [12, "B5", 2],
+        [14, "F#5", 1],
+        [15, "D#5", 1]
+      ]
+    }
+  },
+  "arrangement": [
+    {
+      "name": "intro",
+      "bars": 4,
+      "parts": ["piano", "strings"]
+    },
+    {
+      "name": "verse 1",
+      "bars": 8,
+      "parts": ["kick", "snare", "clap", "hat", "bass", "piano"]
+    },
+    {
+      "name": "hook 1",
+      "bars": 8,
+      "parts": ["kick", "snare", "clap", "hat", "bass", "piano", "strings", "lead"]
+    },
+    {
+      "name": "verse 2",
+      "bars": 8,
+      "parts": ["kick", "snare", "clap", "hat", "bass", "piano"]
+    },
+    {
+      "name": "hook 2",
+      "bars": 8,
+      "parts": ["kick", "snare", "clap", "hat", "bass", "piano", "strings", "lead"]
+    },
+    {
+      "name": "outro",
+      "bars": 4,
+      "parts": ["piano", "strings"]
+    }
+  ]
+}

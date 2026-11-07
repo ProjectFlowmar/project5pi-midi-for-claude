@@ -162,7 +162,8 @@ def master(src, dst, lufs: float = -10.0, ceiling_db: float = -1.0, bitrate: str
     gain = lufs - start['lufs']
     limit = 10 ** ((ceiling_db - 0.7) / 20)
     res = {}
-    for _ in range(5):
+
+    def encode():
         af = (f"volume={gain:.2f}dB,alimiter=limit={limit:.4f}:level=false:attack=1:release=50:asc=1,"
               f"aresample=44100")
         args = ['-y', '-i', str(src), '-af', af]
@@ -171,15 +172,23 @@ def master(src, dst, lufs: float = -10.0, ceiling_db: float = -1.0, bitrate: str
         elif dst.suffix.lower() == '.wav':
             args += ['-c:a', 'pcm_s24le']
         _run([*args, str(dst)])
-        res = loudness(dst)
-        over = res['true_peak_db'] is not None and res['true_peak_db'] > ceiling_db
+        return loudness(dst)
+
+    over = lambda r: r['true_peak_db'] is not None and r['true_peak_db'] > ceiling_db
+    for _ in range(5):
+        res = encode()
         miss = lufs - res['lufs']
-        if over:
+        if over(res):
             limit *= 10 ** ((ceiling_db - res['true_peak_db'] - 0.2) / 20)
         elif abs(miss) > 0.5:
             gain += miss
         else:
             break
+    for _ in range(3):  # the ceiling always wins over the loudness target
+        if not over(res):
+            break
+        gain -= res['true_peak_db'] - ceiling_db + 0.3
+        res = encode()
     res.update({'file': str(dst), 'target_lufs': lufs, 'gain_db': round(gain, 2),
                 'input_lufs': start['lufs']})
     if abs(lufs - res['lufs']) > 0.5:
