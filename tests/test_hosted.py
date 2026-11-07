@@ -27,17 +27,22 @@ class FakeAI(AI):
 @pytest.fixture
 def svc(tmp_path):
     mails = []
+    svc_calls = []
     subs = {'sub_1': {'status': 'active', 'current_period_end': int(time.time()) + 30 * 86400,
                       'items': {'data': [{'price': {'recurring': {'interval': 'year'}}}]}}}
 
     def stripe_call(method, path, data=None):
         if path.startswith('subscriptions/'):
             return subs[path.split('/')[1]]
+        if path == 'checkout/sessions':
+            svc_calls.append(data)
+            return {'url': 'https://checkout.stripe.com/c/pay/cs_test_' + data['line_items[0][price]']}
         if path == 'billing_portal/sessions':
             return {'url': 'https://billing.stripe.com/p/session/test_' + data['customer']}
         raise AssertionError(path)
     s = H.Service(H.DB(str(tmp_path / 'h.db')), ai=FakeAI(), mailer=mails.append, stripe_call=stripe_call)
     s.mails = mails
+    s.checkout_calls = svc_calls
     return s
 
 
@@ -153,3 +158,15 @@ def test_client_talks_to_service_and_fixes_local_build_errors(svc, monkeypatch):
             c.revise({'template': 'Trap'}, 'x')
     finally:
         srv.shutdown()
+
+
+def test_branded_checkout_session(svc, monkeypatch):
+    with pytest.raises(ValueError, match='not selling'):
+        svc.checkout_url('monthly')
+    monkeypatch.setenv('P5H_PRICE_MONTHLY', 'price_m')
+    monkeypatch.setenv('P5H_BRAND_ICON', 'file_123')
+    assert svc.checkout_url('monthly').endswith('price_m')
+    a = svc.checkout_calls[-1]
+    assert a['mode'] == 'subscription' and a['allow_promotion_codes'] == 'true'
+    assert a['branding_settings[display_name]'] == 'P5 MIDI Studio by Project5pi'
+    assert a['branding_settings[icon][file]'] == 'file_123'

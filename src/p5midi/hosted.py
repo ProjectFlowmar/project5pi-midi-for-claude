@@ -11,6 +11,8 @@ Endpoints (JSON):
     POST /v1/portal   {license}         -> {url}  Stripe page to cancel or change the card
     POST /v1/resend   {email}           -> {ok}   emails the key again if that email bought one
     POST /stripe/webhook                Stripe events -> licenses (signature checked)
+    GET  /buy/monthly | /buy/yearly     creates a Checkout Session with this product's own branding and redirects
+                                        (Payment Links can only use the account-wide branding)
 
 Free: 5 songs a month per device (15 per IP), up to 60 s, 2 changes per song.
 Paid ($5/month or $39/year): up to 5 min, unlimited changes, 100 songs a day cap.
@@ -18,7 +20,8 @@ A global daily cap protects the AI bill. The service keeps emails only for licen
 
 Environment: P5H_DB (sqlite path), P5H_PORT (8790), DEEPSEEK_API_KEY (or P5MIDI_AI_*),
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, P5H_LINK_MONTHLY, P5H_LINK_YEARLY, P5H_PRICE_YEARLY,
-BREVO_API_KEY, P5H_MAIL_FROM, P5H_DAILY_CAP (3000), P5H_SALT, P5H_PORTAL_CONFIG, P5H_RETURN_URL.
+BREVO_API_KEY, P5H_MAIL_FROM, P5H_DAILY_CAP (3000), P5H_SALT, P5H_PORTAL_CONFIG, P5H_RETURN_URL,
+P5H_PRICE_MONTHLY, P5H_PRICE_YEARLY, P5H_BRAND_NAME, P5H_BRAND_ICON (Stripe file id), P5H_SUCCESS_URL.
 """
 from __future__ import annotations
 
@@ -295,6 +298,22 @@ class Service:
                           validate=catalog_check(cat))
         return {'spec': spec, 'song': body['song'], 'usage': usage}
 
+    def checkout_url(self, plan: str) -> str:
+        price = env('P5H_PRICE_MONTHLY' if plan == 'monthly' else 'P5H_PRICE_YEARLY')
+        if not price:
+            raise ValueError('not selling yet')
+        args = {'mode': 'subscription', 'line_items[0][price]': price, 'line_items[0][quantity]': 1,
+                'allow_promotion_codes': 'true', 'billing_address_collection': 'auto',
+                'success_url': env('P5H_SUCCESS_URL', 'https://project5pi.com/midi/thanks/'),
+                'cancel_url': env('P5H_RETURN_URL', 'https://project5pi.com/midi/'),
+                'metadata[app]': 'p5midi', 'subscription_data[metadata][app]': 'p5midi',
+                'branding_settings[display_name]': env('P5H_BRAND_NAME', 'P5 MIDI Studio by Project5pi'),
+                'branding_settings[background_color]': '#F1F2F0', 'branding_settings[button_color]': '#0D100F',
+                'branding_settings[font_family]': 'inter', 'branding_settings[border_style]': 'rectangular'}
+        if env('P5H_BRAND_ICON'):
+            args.update({'branding_settings[icon][type]': 'file', 'branding_settings[icon][file]': env('P5H_BRAND_ICON')})
+        return self.stripe_call('POST', 'checkout/sessions', args)['url']
+
     def portal(self, body, ip) -> dict:
         lic = license_row(self.db, str(body.get('license', '')))
         if not lic:
@@ -338,6 +357,24 @@ def make_handler(svc: Service):
             self.wfile.write(data)
 
         def do_GET(self):
+            if self.path in ('/buy/monthly', '/buy/yearly'):
+                bucket = RATE.setdefault('buy:' + self.ip(), [])
+                now = time.time()
+                bucket[:] = [t for t in bucket if now - t < 60]
+                if len(bucket) >= 10:
+                    return self.send(429, {'error': 'Too many requests. Wait a minute.'})
+                bucket.append(now)
+                try:
+                    url = svc.checkout_url(self.path.rsplit('/', 1)[1])
+                except Exception as e:
+                    print('checkout error', type(e).__name__, str(e)[:200], flush=True)
+                    return self.send(503, {'error': 'Checkout is not available right now. Please try again shortly.'})
+                self.send_response(303)
+                self.send_header('location', url)
+                self.send_header('cache-control', 'no-store')
+                self.send_header('content-length', '0')
+                self.end_headers()
+                return
             if self.path == '/v1/plans':
                 return self.send(200, svc.plans())
             if self.path == '/health':
