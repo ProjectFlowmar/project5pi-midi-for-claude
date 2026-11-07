@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P5 MIDI Studio</title>
+<style>
+:root{--ink:#0D100F;--muted:#565C58;--faint:#8C948F;--rule:#DADDD7;--soft:#E8EAE6;--mint:#5DE6C8;--green:#0F766E;
+  --green-deep:#0B3F3A;--pale:#E6F5F1;--bar:#0D1211;--on-bar:#D3D8D5;--warn:#B45309;--warn-pale:#FDF3E2;--bad:#B91C1C}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,'Segoe UI',system-ui,sans-serif;color:var(--ink);background:#F1F2F0;font-size:15.5px;line-height:1.55}
+.mono{font-family:'JetBrains Mono',Consolas,monospace}
+header{background:var(--bar);color:var(--on-bar);position:sticky;top:0;z-index:10}
+.hrow{max-width:1080px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px}
+.logo{font-family:'JetBrains Mono',Consolas,monospace;color:var(--mint);font-weight:600;font-size:18px}
+.app{color:#fff;font-weight:600}
+.spacer{flex:1}
+button{font:inherit;cursor:pointer}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 20px;border-radius:4px;border:0;
+  font-family:'JetBrains Mono',Consolas,monospace;font-size:14px;font-weight:500}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.fill{background:var(--mint);color:var(--ink)}.fill:hover:not(:disabled){background:#7FF0DA}
+.line{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}.line:hover:not(:disabled){background:var(--ink);color:#fff}
+.ghost{background:transparent;color:var(--on-bar);border:1px solid #3a4441}.ghost:hover{color:var(--mint);border-color:var(--mint)}
+main{max-width:1080px;margin:0 auto;padding:28px 24px 64px;display:grid;gap:22px}
+.card{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:22px}
+h1{font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1.15}
+h2{font-size:20px;font-weight:700;letter-spacing:-.015em}
+.sub{color:var(--muted);margin-top:4px}
+textarea,input,select{font:inherit;color:var(--ink);background:#fff;border:1px solid #B9C0BC;border-radius:6px;padding:12px 14px;width:100%}
+textarea{min-height:96px;resize:vertical;margin-top:14px}
+textarea:focus,input:focus,select:focus{outline:3px solid var(--mint);outline-offset:0;border-color:var(--green)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{background:var(--pale);color:var(--green-deep);border:0;border-radius:999px;padding:6px 12px;font-size:13.5px}
+.chip:hover{background:#d3efe7}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.row select{width:auto;min-width:170px}
+.banner{background:var(--warn-pale);border:1px solid #F3D9A8;color:#7A3E06;border-radius:10px;padding:16px 18px}
+.banner b{color:#5A2E04}
+.banner ul{margin:8px 0 0 18px}
+.steps{list-style:none;margin-top:12px;display:grid;gap:6px}
+.steps li{display:flex;gap:10px;font-size:14.5px}
+.steps .t{color:var(--faint);min-width:48px}
+.spin{width:14px;height:14px;border:2px solid var(--mint);border-right-color:transparent;border-radius:50%;animation:s 0.8s linear infinite;display:inline-block}
+@keyframes s{to{transform:rotate(360deg)}}
+.err{color:var(--bad);margin-top:10px}
+.song .top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.idea{color:var(--muted);font-size:14px;margin-top:2px;max-width:60ch}
+.vers{display:flex;gap:6px;flex-wrap:wrap}
+.vers button{background:#F4F5F3;border:1px solid var(--rule);border-radius:4px;padding:4px 10px;font-size:12.5px}
+.vers button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+audio{width:100%;margin:14px 0 6px}
+.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;margin-top:8px}
+.meter{display:grid;gap:6px}
+.meter div{display:grid;grid-template-columns:96px 1fr 52px;gap:10px;align-items:center;font-size:13px}
+.meter i{display:block;height:9px;border-radius:3px;background:var(--mint)}
+.meter span{color:var(--muted);text-align:right}
+.lbl{font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.ok{color:var(--green);font-weight:600;font-size:14px}
+.notes{list-style:none;display:grid;gap:6px}
+.notes li{font-size:13.5px;background:var(--warn-pale);border-radius:6px;padding:8px 10px;color:#6B3A0A}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.change{display:flex;gap:8px;margin-top:10px}
+.change input{flex:1}
+.empty{color:var(--muted);text-align:center;padding:36px}
+dialog{border:0;border-radius:10px;padding:24px;max-width:520px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(13,16,15,.5)}
+dialog label{display:grid;gap:6px;font-weight:600;font-size:14px;margin-top:14px}
+dialog small{font-weight:400;color:var(--muted)}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="hrow"><span class="logo">Project5pi</span><span class="app">MIDI Studio</span><span class="spacer"></span>
+  <span class="mono" id="ver" style="font-size:12px;color:#8C948F"></span><button class="btn ghost" id="openSettings">Settings</button></div></header>
+<main>
+  <div class="banner" id="setup" hidden></div>
+
+  <section class="card">
+    <h1>What should we make?</h1>
+    <p class="sub">Describe the song. Genre, tempo, mood, instruments, how it should build. The more you say, the closer it gets.</p>
+    <textarea id="idea" placeholder="Dark trap, 140 BPM, A minor. Sliding 808, hat rolls, a pad and a short synth hook. Quiet intro, two hooks, a break."></textarea>
+    <div class="chips" id="examples"></div>
+    <div class="row">
+      <select id="len" aria-label="Length"><option value="60">About 1 minute</option><option value="120" selected>About 2 minutes</option><option value="180">About 3 minutes</option><option value="">Let it decide</option></select>
+      <button class="btn fill" id="make">Make it</button>
+      <span class="sub" id="makeNote">Takes about a minute: writing, FL Studio export, mastering, mix check.</span>
+    </div>
+    <div id="job" hidden><ul class="steps" id="steps"></ul><p class="err" id="jobErr" hidden></p></div>
+  </section>
+
+  <section id="songs"></section>
+</main>
+
+<dialog id="settings">
+  <h2>Settings</h2>
+  <p class="sub">Your key is saved only on this computer and sent only to the AI service you choose.</p>
+  <label>AI key <small>DeepSeek key (platform.deepseek.com). Leave blank to keep the current one.</small><input id="aiKey" type="password" autocomplete="off" placeholder="sk-..."></label>
+  <label>AI address <small>Optional. Any OpenAI-compatible chat endpoint. Blank = DeepSeek.</small><input id="aiUrl" placeholder="https://api.deepseek.com/v1/chat/completions"></label>
+  <label>Model <small>Optional. Blank = deepseek-v4-flash.</small><input id="aiModel" placeholder="deepseek-v4-flash"></label>
+  <label>Songs folder<input id="outDir"></label>
+  <div class="row"><button class="btn fill" id="saveSettings">Save</button><button class="btn line" id="closeSettings">Cancel</button></div>
+</dialog>
+
+<script>
+const $=s=>document.querySelector(s);
+const EX=['Lo-fi study beat, 80 BPM, dusty piano chords, soft swung drums, warm bass','Upbeat house, 124 BPM, four-on-the-floor, offbeat bass, chord stabs, a breakdown with an arp','Moody drill, 142 BPM, sliding 808, choppy hats, dark minor piano','Funky groove, 105 BPM, slap-style bass, tight drums, bright keys','Cinematic ambient, slow, big pads and strings, no drums for the first half'];
+const CHANGES=['More energy','Darker','Brighter','Simpler drums','Busier drums','Slower','Faster','Longer'];
+let state=null, sel={};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(path,body){const r=await fetch(path,body?{method:'POST',headers:{'content-type':'application/json','x-p5':'1'},body:JSON.stringify(body)}:{});const j=await r.json().catch(()=>({error:'bad reply'}));if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j}
+
+EX.forEach(e=>{const b=document.createElement('button');b.className='chip';b.textContent=e.split(',')[0];b.title=e;b.onclick=()=>{$('#idea').value=e;$('#idea').focus()};$('#examples').appendChild(b)});
+
+function setup(){const m=[];
+  if(!state.ai)m.push('<li><b>Add an AI key</b> in Settings (a DeepSeek key costs about half a cent per song).</li>');
+  if(!state.fl)m.push('<li><b>FL Studio not found.</b> Install FL Studio 20.7 or newer. Without it you still get the project and MIDI files, but no audio.</li>');
+  if(!state.ffmpeg)m.push('<li><b>ffmpeg not found.</b> Needed for mastering and the mix check. Install with <span class="mono">winget install ffmpeg</span>.</li>');
+  $('#setup').hidden=!m.length;$('#setup').innerHTML='<b>Before your first song:</b><ul>'+m.join('')+'</ul>';
+  $('#make').disabled=!state.ai||state.busy}
+
+function meter(secs){if(!secs||!secs.length)return'';const v=secs.map(s=>s[1]).filter(x=>x!=null);const lo=Math.min(...v)-3,hi=Math.max(...v);
+  return '<div class="lbl">Loudness by section</div><div class="meter">'+secs.map(([n,l])=>`<div><b>${esc(n)}</b><i style="width:${l==null?0:Math.max(6,Math.round((l-lo)/(hi-lo||1)*100))}%"></i><span class="mono">${l??'-'}</span></div>`).join('')+'</div>'}
+
+function render(){const box=$('#songs');
+  if(!state.songs.length){box.innerHTML='<div class="card empty">Your songs will show up here.</div>';return}
+  box.innerHTML='<h2 style="margin:6px 0 12px">Your songs</h2>'+state.songs.map(s=>{
+    const v=s.versions.find(x=>x.name===sel[s.id])||s.versions[s.versions.length-1];sel[s.id]=v.name;
+    const notes=v.notes&&v.notes.length?'<div class="lbl">Mix check</div><ul class="notes">'+v.notes.map(n=>`<li>${esc(n)}</li>`).join('')+'</ul>':'<div class="lbl">Mix check</div><p class="ok">Passed. No problems found.</p>';
+    return `<article class="card song" style="margin-bottom:16px" data-id="${esc(s.id)}">
+      <div class="top"><div><h2>${esc(s.title)}</h2><p class="idea">${esc(s.idea)}</p></div>
+      <div class="vers">${s.versions.map(x=>`<button data-v="${esc(x.name)}" class="${x.name===v.name?'on':''}">${esc(x.name.match(/-v\d+$/)?x.name.match(/v\d+$/)[0]:'v1')}</button>`).join('')}</div></div>
+      ${v.mp3?`<audio controls preload="none" src="/files/${encodeURIComponent(s.id)}/${encodeURIComponent(v.name)}.mp3"></audio>`:'<p class="sub" style="margin:12px 0">No audio (FL Studio not found). The project and MIDI files are in the folder.</p>'}
+      <p class="sub mono" style="font-size:12.5px">${v.bpm?esc(v.bpm)+' BPM':''}${v.seconds?' · '+Math.round(v.seconds)+' s':''}${v.lufs!=null?' · '+v.lufs+' LUFS':''}${v.parts.length?' · '+esc(v.parts.join(', ')):''}</p>
+      <div class="grid2"><div>${meter(v.sections)}</div><div>${notes}</div></div>
+      <div class="actions"><button class="btn fill" data-open="flp">Open in FL Studio</button><button class="btn line" data-open="folder">Show files</button></div>
+      <div class="lbl" style="margin-top:16px">Change it</div>
+      <div class="chips">${CHANGES.map(c=>`<button class="chip" data-change="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+      <div class="change"><input placeholder="Or say what to change, e.g. add a guitar-like lead in the hook" data-custom><button class="btn line" data-go>Change</button></div>
+    </article>`}).join('');
+  box.querySelectorAll('.song').forEach(el=>{const id=el.dataset.id;
+    el.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{sel[id]=b.dataset.v;render()});
+    el.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>api('/api/open',{song:id,name:b.dataset.open==='flp'?sel[id]:''}).catch(e=>alertMsg(e)));
+    el.querySelectorAll('[data-change]').forEach(b=>b.onclick=()=>run('/api/change',{song:id,instruction:b.dataset.change}));
+    el.querySelector('[data-go]').onclick=()=>{const t=el.querySelector('[data-custom]').value.trim();if(t)run('/api/change',{song:id,instruction:t})};
+  })}
+
+function alertMsg(e){$('#job').hidden=false;$('#jobErr').hidden=false;$('#jobErr').textContent=e.message||e}
+
+async function load(){state=await api('/api/state');$('#ver').textContent='v'+state.version;setup();render()}
+
+async function run(path,body){$('#job').hidden=false;$('#jobErr').hidden=true;$('#steps').innerHTML='<li><span class="spin"></span><span>starting</span></li>';$('#make').disabled=true;
+  document.querySelectorAll('[data-change],[data-go]').forEach(b=>b.disabled=true);
+  window.scrollTo({top:0,behavior:'smooth'});
+  try{const {job}=await api(path,body);await poll(job)}catch(e){alertMsg(e)}finally{await load()}}
+
+async function poll(id){for(;;){const j=await api('/api/job/'+id);
+  $('#steps').innerHTML=j.steps.map((s,i)=>`<li><span class="t mono">${s.t}s</span>${i===j.steps.length-1&&j.status==='running'?'<span class="spin"></span>':'<span>✓</span>'}<span>${esc(s.text)}</span></li>`).join('');
+  if(j.status==='done'){const r=j.result;$('#steps').insertAdjacentHTML('beforeend',`<li><span class="t mono">${r.seconds}s</span><span class="ok">Ready: ${esc(r.title)}</span></li>`);return}
+  if(j.status==='error'){alertMsg(j.error);return}
+  await new Promise(r=>setTimeout(r,1200))}}
+
+$('#make').onclick=()=>{const idea=$('#idea').value.trim();if(idea.length<3){$('#idea').focus();return}run('/api/create',{idea,seconds:$('#len').value})};
+$('#openSettings').onclick=()=>{$('#outDir').value=state?state.out_dir:'';$('#settings').showModal()};
+$('#closeSettings').onclick=()=>$('#settings').close();
+$('#saveSettings').onclick=async()=>{const b={out_dir:$('#outDir').value,ai_url:$('#aiUrl').value,ai_model:$('#aiModel').value};if($('#aiKey').value.trim())b.ai_key=$('#aiKey').value.trim();
+  try{await api('/api/settings',b);$('#aiKey').value='';$('#settings').close();await load()}catch(e){alertMsg(e)}};
+load();
+</script>
+</body>
+</html>

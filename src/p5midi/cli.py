@@ -8,6 +8,9 @@
   p5midi analyze file.wav [--reference ref.mp3]
   p5midi master in.wav out.mp3 [--lufs -10] [--ceiling -1]
   p5midi midi song.json [-o out.mid]    export the arrangement as a MIDI file (any DAW)
+  p5midi create "idea" [--seconds 120]  AI writes the song, then make + automatic mix fix
+  p5midi change <song folder> "darker"  AI revises the latest version
+  p5midi studio                         local app: idea box, player, Open in FL Studio
 """
 from __future__ import annotations
 
@@ -76,6 +79,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument('--lufs', type=float, default=-10.0); p.add_argument('--ceiling', type=float, default=-1.0)
     p = sub.add_parser('midi', help='spec -> .mid')
     p.add_argument('spec'); p.add_argument('-o', '--out')
+    p = sub.add_parser('create', help='idea -> song (needs an AI key, e.g. DEEPSEEK_API_KEY)')
+    p.add_argument('idea'); p.add_argument('-o', '--out', default='songs'); p.add_argument('--seconds', type=float)
+    p.add_argument('--no-fix', action='store_true'); p.add_argument('--no-render', action='store_true')
+    p = sub.add_parser('change', help='AI revises the latest version of a song')
+    p.add_argument('folder'); p.add_argument('instruction'); p.add_argument('--no-render', action='store_true')
+    p = sub.add_parser('studio', help='open the local Studio app in your browser')
+    p.add_argument('--port', type=int, default=47390); p.add_argument('--no-browser', action='store_true')
 
     a = ap.parse_args(argv)
     try:
@@ -108,6 +118,17 @@ def main(argv: list[str] | None = None) -> int:
         elif a.cmd == 'master':
             from .analyze import master
             _print(master(a.src, a.dst, a.lufs, a.ceiling))
+        elif a.cmd in ('create', 'change'):
+            from . import app
+            say = lambda m: print(f'... {m}', file=sys.stderr)
+            if a.cmd == 'create':
+                r = app.create(a.idea, a.out, max_seconds=a.seconds, fix=not a.no_fix, render=not a.no_render, step=say)
+            else:
+                r = app.change(a.folder, a.instruction, render=not a.no_render, step=say)
+            _print({k: r[k] for k in r if k != 'report'} | {'notes': (r['report'].get('analysis') or {}).get('notes')})
+        elif a.cmd == 'studio':
+            from .studio import main as studio_main
+            studio_main(a.port, not a.no_browser)
         elif a.cmd == 'midi':
             from .song import build
             from .midi import export_midi

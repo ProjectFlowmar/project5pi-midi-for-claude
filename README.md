@@ -62,6 +62,33 @@ a report like this (trimmed):
 
 FL Studio must be closed while rendering; an open FL grabs the command instead.
 
+## Studio app: type an idea, click Make
+
+```bash
+pip install "project5pi-midi-for-claude @ git+https://github.com/ProjectFlowmar/project5pi-midi-for-claude"
+p5midi studio          # opens http://127.0.0.1:47390 in your browser
+```
+
+![P5 MIDI Studio](docs/studio.png)
+
+Describe the song and click **Make it**. About 40 seconds later you have the FL Studio
+project, MP3 and MIDI. If the mix check finds a problem, the AI fixes it and renders
+again before you hear it. Then use **More energy / Darker / Simpler drums...** or type
+any change; every version is kept. **Open in FL Studio** opens the project.
+
+The Studio writes songs with any OpenAI-compatible model. Paste a DeepSeek key in
+Settings (about half a cent per song with `deepseek-v4-flash`), or point it at OpenAI,
+OpenRouter or a local model. Same from the command line:
+
+```bash
+export DEEPSEEK_API_KEY=sk-...
+p5midi create "Lo-fi study beat, 80 BPM, dusty piano, swung drums" --seconds 90
+p5midi change "songs/20261107-...-dusty-piano" "darker, slower"
+```
+
+A hosted version that needs no key (free for 5 songs a month) is coming:
+[join the waitlist](https://project5pi.com/midi/?ref=github).
+
 ## Use it from Claude
 
 **Claude Code / Claude Desktop (MCP).** Register the server:
@@ -122,6 +149,9 @@ Full reference: [SPEC.md](src/p5midi/SPEC.md).
 | `p5midi master in.wav out.mp3 --lufs -10` | static gain + limiter to a loudness target, true peak under -1 dBFS |
 | `p5midi analyze song.mp3 [--spec song.json] [--reference ref.mp3]` | LUFS, true peak, six-band balance, stereo width, per-section loudness, plain-language problems |
 | `p5midi make song.json` | all of the above in one go |
+| `p5midi create "idea"` | AI writes the spec, then make + one automatic mix fix |
+| `p5midi change <folder> "darker"` | AI revises the latest version, keeps the old one |
+| `p5midi studio` | the local app |
 
 ## What it checks for you
 

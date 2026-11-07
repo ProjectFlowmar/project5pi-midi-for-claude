@@ -110,13 +110,19 @@ def analyze(path, sections: list[dict] | None = None, reference=None) -> dict:
             if lv['lufs'] is None or lv['lufs'] < -45:
                 notes.append(f"Section {s['name']!r} is silent or near-silent; check its channels make sound.")
         secs = [s for s in rep['sections'] if s['lufs'] is not None and s.get('parts')]
-        for a in secs:  # a thinner section should not be louder than a fuller one
-            for b in secs:
-                if set(a['parts']) < set(b['parts']) and a['lufs'] - b['lufs'] > 1.5:
-                    extra = sorted(set(a['parts']) & set(b['parts']))
-                    notes.append(f"Section {a['name']!r} ({', '.join(a['parts'])}) is {a['lufs'] - b['lufs']:.1f} LU "
-                                 f"louder than the fuller {b['name']!r}. Likely too loud: one of {', '.join(extra)}.")
+        for thin in secs:  # a thinner section should not be louder than a fuller one
+            for full in secs:
+                if set(thin['parts']) < set(full['parts']) and thin['lufs'] - full['lufs'] > 1.5:
+                    shared = sorted(set(thin['parts']) & set(full['parts']))
+                    notes.append(f"Section {thin['name']!r} ({', '.join(thin['parts'])}) is "
+                                 f"{thin['lufs'] - full['lufs']:.1f} LU louder than the fuller {full['name']!r}. "
+                                 f"Likely too loud: one of {', '.join(shared)}.")
                     break
+        if len(secs) >= 3:
+            lv = [s['lufs'] for s in secs]
+            if max(lv) - min(lv) < 2.0:
+                notes.append(f"Little contrast: every section is within {max(lv) - min(lv):.1f} LU of the others. "
+                             "Give the intro and break fewer parts or lower velocities so the main sections hit harder.")
     if reference:
         ref = Path(reference)
         rl = loudness(ref)
