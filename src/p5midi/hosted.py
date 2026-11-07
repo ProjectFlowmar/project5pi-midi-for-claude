@@ -18,7 +18,7 @@ A global daily cap protects the AI bill. The service keeps emails only for licen
 
 Environment: P5H_DB (sqlite path), P5H_PORT (8790), DEEPSEEK_API_KEY (or P5MIDI_AI_*),
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, P5H_LINK_MONTHLY, P5H_LINK_YEARLY, P5H_PRICE_YEARLY,
-BREVO_API_KEY, P5H_MAIL_FROM, P5H_DAILY_CAP (3000), P5H_SALT.
+BREVO_API_KEY, P5H_MAIL_FROM, P5H_DAILY_CAP (3000), P5H_SALT, P5H_PORTAL_CONFIG, P5H_RETURN_URL.
 """
 from __future__ import annotations
 
@@ -299,7 +299,10 @@ class Service:
         lic = license_row(self.db, str(body.get('license', '')))
         if not lic:
             raise ValueError('unknown license key')
-        s = self.stripe_call('POST', 'billing_portal/sessions', {'customer': lic['customer']})
+        args = {'customer': lic['customer'], 'return_url': env('P5H_RETURN_URL', 'https://project5pi.com/midi/')}
+        if env('P5H_PORTAL_CONFIG'):
+            args['configuration'] = env('P5H_PORTAL_CONFIG')
+        s = self.stripe_call('POST', 'billing_portal/sessions', args)
         return {'url': s['url']}
 
     def resend(self, body, ip) -> dict:
