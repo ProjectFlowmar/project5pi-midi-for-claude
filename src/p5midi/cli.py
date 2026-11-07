@@ -92,6 +92,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument('--srt', help='narration captions with times (without it, the scene cuts of the video are used)')
     p.add_argument('--brief', default='', help='one line on the feel, e.g. "uplifting product promo"')
     p.add_argument('--score', action='store_true', help='always compose an FL Studio score (default: only for 3 minutes and longer)')
+    p.add_argument('--style', help='composer influence id (p5midi styles), or auto to let the AI pick')
     p.add_argument('--threshold', type=float, default=180.0, help='seconds; shorter videos get free-license music')
     p.add_argument('--video', help='the video (for its length and an optional preview mix)')
     p.add_argument('--duration', type=float, help='length in seconds if no --video')
@@ -100,6 +101,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument('--title', default='Film score'); p.add_argument('-o', '--out', default='score')
     p.add_argument('--no-render', action='store_true'); p.add_argument('--preview', action='store_true',
                    help='also write <out>/preview.mp4: the video with the score ducked under its audio')
+    p = sub.add_parser('styles', help='list the composer/producer influence database')
+    p.add_argument('id', nargs='?', help='show one style in full')
     p = sub.add_parser('studio', help='open the local Studio app in your browser')
     p.add_argument('--port', type=int, default=47390); p.add_argument('--no-browser', action='store_true')
 
@@ -163,13 +166,16 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 lines = []
             r = film.soundtrack(dur, a.out, lines, regions, a.title, a.brief, force_score=a.score, threshold=a.threshold,
-                                render=not a.no_render, step=lambda m: print(f'... {m}', file=sys.stderr))
+                                render=not a.no_render, step=lambda m: print(f'... {m}', file=sys.stderr), style=a.style)
             if a.preview and a.video and r.get('wav'):
                 r['preview'] = str(film.mix_preview(a.video, r['wav'], Path(a.out) / 'preview.mp4'))
             if 'cue_sheet' in r:
                 r['cue_sheet'] = {'key': r['cue_sheet']['key'], 'source': r['cue_sheet']['source'],
                                   'cues': len(r['cue_sheet']['cues']), 'hits': r['cue_sheet']['hits']}
             _print(r)
+        elif a.cmd == 'styles':
+            from . import styles as _styles
+            _print(_styles.get(a.id) if a.id else _styles.menu())
         elif a.cmd == 'studio':
             from .studio import main as studio_main
             studio_main(a.port, not a.no_browser)

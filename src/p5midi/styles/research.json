@@ -1,0 +1,768 @@
+[
+  {
+    "id": "zimmer",
+    "name": "Hans Zimmer",
+    "kind": "film",
+    "known_for": "Inception, Interstellar, The Dark Knight trilogy, Gladiator, Dune; Oscar for The Lion King and Dune; pioneer of hybrid synth-plus-orchestra scoring.",
+    "techniques": [
+      "Anchors a cue on a short, repeating ostinato (a 'drilling repetition') and lets that pattern carry the structure instead of a long melody.",
+      "Starts from a very simple idea and builds scale by stacking layers (low drums, horns, strings, synths) rather than by changing the chords.",
+      "Writes electronic soundscapes first, then has orchestral players reinterpret them acoustically, so synth and orchestra share one palette.",
+      "Treats electronics as equal to the orchestra and uses a small set of well-known analog or virtual synths deeply instead of many plug-ins.",
+      "Blurs the line between score and sound design: builds custom noise-based sound sources and tunes effects to sit inside the music.",
+      "Drops conventional action devices (steady drums, accelerating tempos) in favor of sustained organ-like or choir textures when the story is about awe or time.",
+      "Favors baritone and bass voices and brass for weight; uses solo soprano or a lone voice sparingly so it feels fragile.",
+      "Uses the human voice and hybrid instruments (one instrument given the character of another, acoustic instruments played unconventionally) as a distinctive texture, with massed voices edited tightly in time."
+    ],
+    "params": {
+      "bpm": [60, 130],
+      "mode": "minor",
+      "harmony": "Few chords, slow harmonic rhythm, long pedal tones in the bass, open fifths and octaves, modal minor color; tension comes from layering and register, not chord variety.",
+      "progressions": ["i VI III VII", "i VII VI VII", "i III VII VI"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": true,
+      "arp_rate": 8,
+      "layers": {"strings": 0.8, "piano": 0.3, "choir": 0.3, "glass": 0.0, "pluck": 0.1, "sub": 0.6, "brass": 0.6, "synth_pad": 0.6},
+      "chord_every_seconds": 8,
+      "hits_per_minute": 20,
+      "dynamics": "slow-build",
+      "drums": "In action cues: big low drums and heavy hits, sometimes tape-saturated electronic drums; in introspective cues: none."
+    },
+    "sources": [
+      "https://www.musictech.com/features/hans-zimmer-interview/",
+      "https://www.uaudio.com/blogs/ua/hans-zimmer-ua-interview",
+      "https://grantland.com/hollywood-prospectus/brothers-in-brong-how-hans-zimmer-and-christopher-nolan-make-the-boldest-scores-in-hollywood/",
+      "https://nofilmschool.com/zimmer-dune-score"
+    ],
+    "notes": "Ostinato, layering, synth/orchestra hybrid, sound-design blur and voice use are sourced. The cited articles do NOT discuss harmony, pedal tones or exact tempos, so bpm, mode, harmony, progressions, chord_every_seconds and hits_per_minute are conservative inferences for a generic Zimmer-style cue."
+  },
+  {
+    "id": "goransson",
+    "name": "Ludwig Göransson",
+    "kind": "film",
+    "known_for": "Oscars for Black Panther and Oppenheimer; also Tenet, The Mandalorian, Creed; longtime Childish Gambino producer.",
+    "techniques": [
+      "Picks one expressive solo instrument as the protagonist's voice (solo violin) and shifts its meaning purely by vibrato, bow pressure and glissando intensity, from tender to neurotic.",
+      "Seeds a theme as a simple melody over a very simple bassline played live, then grows it from solo to quartet to octet to full string section.",
+      "Stacks recorded microtonal glissandi to create siren-like or anxious texture instead of using conventional horror clusters.",
+      "Gives each character a distinct instrument and rhythm of silence, for example a harp for a mysterious figure and a piano with few chords separated by long pauses for an isolated one.",
+      "Builds a custom sample library by recording vintage equipment or instruments (including playing them backwards) and routing acoustic instruments through a modular synth; aims to have most of the palette ready before seeing a cut.",
+      "Uses the orchestra for dynamic range and expression and electronics for frequencies and timbres an orchestra cannot reach, blending analog and digital.",
+      "Builds scores around regionally authentic instruments and local players (talking drum, kora, balafon-style sounds layered with solo performances) rather than sample-pack stand-ins.",
+      "Writes large blocks of music from the script before picture exists, and scores set pieces as long, driving cues that are later reshaped to the edit."
+    ],
+    "params": {
+      "bpm": [60, 140],
+      "mode": "mixed",
+      "harmony": "Simple minor-leaning bass-and-melody foundations, string-driven motion over held bass notes, sparse piano chords with long gaps; modern hybrid rhythm layers on top.",
+      "progressions": ["i VII VI VII", "i iv VII III", "i VI iv V"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 8,
+      "layers": {"strings": 1.0, "piano": 0.3, "choir": 0.1, "glass": 0.1, "pluck": 0.2, "sub": 0.5, "brass": 0.2, "synth_pad": 0.4},
+      "chord_every_seconds": 4,
+      "hits_per_minute": 24,
+      "dynamics": "slow-build",
+      "drums": "Percussion used sparingly and purposefully: foot stomps and impacts folded into key moments in Oppenheimer-style cues; talking drum and West African percussion as the rhythmic identity in Black Panther-style cues."
+    },
+    "sources": [
+      "https://www.screendaily.com/features/ludwig-göransson-discusses-his-acclaimed-oppenheimer-score-you-want-to-feel-what-he-feels/5189255.article",
+      "https://www.slashfilm.com/1448770/composer-ludwig-goransson-oppenheimer-score-exclusive-interview",
+      "https://www.spitfireaudio.com/blogs/editorial/ludwig-goransson-oscar-winning-scores",
+      "https://nofilmschool.com/black-panther-ludwig-g%C3%B6ransson-1",
+      "https://musicinafrica.net/node/47136"
+    ],
+    "notes": "Instrument, process and sound-design claims are sourced. The interviews do not describe ostinato rates, tempo or chord progressions, so those params are conservative inferences ('propulsive' is described, 8ths chosen). The Black Panther African-instrument point rests on search-result summaries (NoFilmSchool, Music In Africa, NME) that were not read in full."
+  },
+  {
+    "id": "richter",
+    "name": "Max Richter",
+    "kind": "film",
+    "known_for": "Sleep (8-hour album), The Leftovers, Ad Astra, Hamnet; post-minimalist composer bridging concert hall and screen.",
+    "techniques": [
+      "Builds pieces from repeating patterns (a lineage from early Glass and Reich) so the material stays legible and the listener always knows where they are.",
+      "Keeps the pulse very slow and treats the music as an immersive landscape of texture and space rather than a sequence of events.",
+      "Gives each pattern a recognizable architecture and keeps it 'not too loud, not too bright' so it can sit for a long time without tiring the ear.",
+      "Anchors long works with sub-bass and low-frequency foundations, using very low drones as the floor under strings and piano.",
+      "Limits the musical vocabulary on purpose (few notes, simple minor triads, adjacent-note patterns) to get a lean, direct emotional statement.",
+      "Asks strings to play long, quiet, even notes and lets small changes in a pattern, rather than new material, create movement.",
+      "Uses undulating, gently syncopated patterns in piano or strings against sustained notes to create hypnotic motion without a drum kit.",
+      "Lets one idea evolve over a very long span, using form and duration itself as the main compositional tool."
+    ],
+    "params": {
+      "bpm": [40, 80],
+      "mode": "minor",
+      "harmony": "Plain minor triads and open voicings, very slow harmonic rhythm, sustained bass notes under repeating figures, occasional sus and added-second color.",
+      "progressions": ["i VI iv V", "i III VII VI", "i v VI iv"],
+      "ostinato": "8ths",
+      "pulse": false,
+      "drone": true,
+      "arp_rate": 8,
+      "layers": {"strings": 1.0, "piano": 0.6, "choir": 0.1, "glass": 0.1, "pluck": 0.0, "sub": 0.4, "brass": 0.0, "synth_pad": 0.4},
+      "chord_every_seconds": 10,
+      "hits_per_minute": 1,
+      "dynamics": "steady",
+      "drums": "none"
+    },
+    "sources": [
+      "https://daily.redbullmusicacademy.com/2015/09/max-richter-interview/",
+      "https://rosetta.to/u/seancarroll/mindscape-288-max-richter-on-the-meaning-of-classical-music-today",
+      "https://medium.com/self-titled/life-story-26a0255c8c81",
+      "https://www.theartsdesk.com/new-music/10-questions-composer-max-richter"
+    ],
+    "notes": "WEAK SOURCING on harmony. Pattern-based approach, slow pulse, sub-bass and limited vocabulary are sourced (Red Bull Music Academy; Mindscape summary; Medium). Minor triads / rubato come from a secondary summary. The MusicRadar Sleep article could not be read (paywalled). bpm, progressions and chord_every_seconds are conservative inferences."
+  },
+  {
+    "id": "johannsson",
+    "name": "Jóhann Jóhannsson",
+    "kind": "film",
+    "known_for": "Arrival, Sicario, The Theory of Everything (Oscar nominations), Prisoners; fused orchestra, electronics, pipe organ and experimental voice.",
+    "techniques": [
+      "Scores dread in the low register: unison contrabasses looped, layered and processed with distortion and compression, plus contrabassoon and contrabass clarinet.",
+      "Uses very low pipe-organ pedal tones (32-foot pipes) and sustained drones as a physically felt foundation.",
+      "Automates effects so nothing is static: filters, distortion and levels keep moving over a held sound.",
+      "Treats voices as texture: extended techniques (throat singing, harmonic singing) and short, Morse-like staccato vocal clusters overlapping polyrhythmically instead of sustained choirs.",
+      "Layers piano using only its sustain (no attack or decay) to create a suspended, cyclical sense of time.",
+      "Layers sound on sound and varies recording speed, a tape-era technique used in a new way to build dense textures.",
+      "Writes from script, concept art and conversations before footage exists, often avoiding temp music, and builds a palette from the film's mood.",
+      "Lets a single musical gesture slow down or mutate by small changes on each repetition, using self-imposed rules to generate structure."
+    ],
+    "params": {
+      "bpm": [40, 80],
+      "mode": "minor",
+      "harmony": "Static or near-static harmony over long drones, low clusters and sustained intervals; movement from texture and register, not chord changes.",
+      "progressions": ["i bII i", "i VI i", "i iv i"],
+      "ostinato": "none",
+      "pulse": false,
+      "drone": true,
+      "arp_rate": 0,
+      "layers": {"strings": 0.7, "piano": 0.3, "choir": 0.5, "glass": 0.2, "pluck": 0.0, "sub": 0.8, "brass": 0.3, "synth_pad": 0.5},
+      "chord_every_seconds": 12,
+      "hits_per_minute": 4,
+      "dynamics": "slow-build",
+      "drums": "none; sparse low percussion and risers (even helicopter-like effects treated as instruments) only to ramp tension."
+    },
+    "sources": [
+      "https://daily.redbullmusicacademy.com/2017/01/johann-johannsson-feature",
+      "https://laist.com/shows/the-frame/composer-johann-johannsson-used-a-32-ft-pipe-organ-to-create-suspense-in-sicario",
+      "https://www.slashfilm.com/547630/johann-johannsson-arrival-music/",
+      "https://www.denofgeek.com/?p=65413"
+    ],
+    "notes": "Techniques are well sourced (Red Bull Music Academy, LAist, SlashFilm, Den of Geek). Harmony, bpm and chord timing are conservative inferences; sources do not give numbers."
+  },
+  {
+    "id": "newman",
+    "name": "Thomas Newman",
+    "kind": "film",
+    "known_for": "American Beauty, The Shawshank Redemption, WALL-E, Skyfall, 1917; many Oscar nominations; known for small-ensemble, texture-first scoring.",
+    "techniques": [
+      "Makes tuned and struck percussion (marimba, xylophone, dulcimer, tablas) the identity of a score, chasing a 'hammered, thwacked' quality instead of strings.",
+      "Builds cues on short, repeating figures over a modal framework rather than long melodies, so the material stays minimal and bittersweet.",
+      "Uses offbeat sonorities and small-ensemble colors: detuned plucked strings, ukulele, banjo, steel guitar, EWI, found or processed sounds.",
+      "Leaves wide gaps between sparse piano phrases so dialogue or narration can breathe.",
+      "Plays music against the picture as ironic commentary at a distance (bouncy groove under bleak narration) instead of mirroring emotion.",
+      "Lets energy build gradually while the mood quietly grows unsettling, and holds strings and synths back until the emotional peak.",
+      "Treats some cues as sound design: atonal ambient texture with frantic percussion to put the audience inside a character's fantasy.",
+      "Varies the ensemble per score, from percussion-only or small band to dark, brooding string orchestra."
+    ],
+    "params": {
+      "bpm": [70, 110],
+      "mode": "mixed",
+      "harmony": "Modal (often dorian/mixolydian-flavored), static or slowly shifting; short figures over a sparse bass note, added seconds and open fifths; occasional atonal ambient textures.",
+      "progressions": ["i VII i VII", "I bVII IV I", "i iv VII i"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 8,
+      "layers": {"strings": 0.3, "piano": 0.5, "choir": 0.0, "glass": 0.2, "pluck": 0.9, "sub": 0.1, "brass": 0.0, "synth_pad": 0.2},
+      "chord_every_seconds": 6,
+      "hits_per_minute": 40,
+      "dynamics": "sparse",
+      "drums": "Percussion is the main color: tuned mallets, tablas, tribal and small drums, light and bouncy; not a kit."
+    },
+    "sources": [
+      "https://www.hypebot.com/hypebot/2018/09/how-thomas-newmans-score-for-american-beauty-flipped-the-script-on-film-music.html",
+      "https://www.bmi.com/news/entry/richard_kirk_award_thomas_newman_fulfills_the_promise_of_his_legacy",
+      "https://www.filmtracks.com/titles/american_beauty.html",
+      "https://www.mfiles.co.uk/composers/Thomas-Newman.htm"
+    ],
+    "notes": "Mostly sourced from coverage of one score (American Beauty) via Hypebot/Soundfly, plus BMI and Filmtracks snippets (BMI page could not be fetched in full). Treat 'mixed/modal' mode, bpm and chord timing as conservative inferences. WEAK on Newman's string-heavy side (Shawshank, 1917)."
+  },
+  {
+    "id": "reznor_ross",
+    "name": "Trent Reznor & Atticus Ross",
+    "kind": "film",
+    "known_for": "Oscars for The Social Network and Soul; Gone Girl, The Girl with the Dragon Tattoo, Bones and All, Challengers.",
+    "techniques": [
+      "Sets fragile, human-sounding piano inside a cold, icy, synthetic landscape so organic and electronic contrast carries the emotion.",
+      "Uses pulsing, forward-moving synth figures to convey restless momentum or mental activity.",
+      "Builds cues around texture and emotional range rather than a single leitmotif per character.",
+      "Starts with a warm, soothing surface and lets it curdle and unravel over the course of the piece, sometimes returning to the opening material at the end.",
+      "Blurs music and sound design, tuning effects so they sit inside the score and the line between the two disappears.",
+      "Writes from broad themes and a short sample of rough footage, sends the director 10 to 20 rough drafts early, then revises and places cues around dialogue.",
+      "Keeps a deliberate human quality in electronic palettes and scales back cheesy or overblown synth walls when they feel comical.",
+      "Adds orchestra or acoustic instruments on top of an electronic base as a late layer, not the starting point."
+    ],
+    "params": {
+      "bpm": [60, 110],
+      "mode": "minor",
+      "harmony": "Static or slowly shifting minor, chromatic or cluster-based pad harmony; repeating piano figures over sustained synth drones; dissonance enters as the piece curdles.",
+      "progressions": ["i bII i", "i VI iv", "i v VI"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": true,
+      "arp_rate": 8,
+      "layers": {"strings": 0.3, "piano": 0.6, "choir": 0.0, "glass": 0.3, "pluck": 0.3, "sub": 0.6, "brass": 0.0, "synth_pad": 0.8},
+      "chord_every_seconds": 8,
+      "hits_per_minute": 8,
+      "dynamics": "steady",
+      "drums": "none or sparse: soft industrial pulses, clicks and processed hits; no conventional kit."
+    },
+    "sources": [
+      "https://thewrap.com/trent-reznor-talks-social-network-22039",
+      "https://exclaim.ca/music/article/trent_reznor_atticus_ross_discuss_gone_girl_soundtrack",
+      "https://www.screendaily.com/trent-reznor-composer-the-social-network/5021862.article",
+      "https://loudwire.com/trent-reznor-similarities-scoring-films-making-nine-inch-nails-albums/"
+    ],
+    "notes": "Sourced from TheWrap (Social Network) and Exclaim (Gone Girl); specific synths, gear and tempos were not described in the sources read, so bpm, harmony and progressions are conservative inferences. Screen Daily and Loudwire were seen in search results only."
+  },
+  {
+    "id": "djawadi",
+    "name": "Ramin Djawadi",
+    "kind": "film",
+    "known_for": "Game of Thrones, House of the Dragon, Westworld, Iron Man, 3 Body Problem; Emmy and Grammy winner.",
+    "techniques": [
+      "Builds a main title from the rhythm first, then adds a simple piano melody, widens the palette and lets the orchestra grow in, following the imagery from small to vast.",
+      "Chooses a core solo voice for its range and color (low cello for a dark world) and sets a no-go instrument rule to avoid genre cliches.",
+      "Uses a percussive ticking-clock pulse to signal a scheming character.",
+      "Builds tension with repetitive, Morse-like patterns that do not repeat in a literal, meaning-bearing way.",
+      "Splits sound sources by meaning: synthetic or abstract sounds for science and technology, piano, strings and harp for human emotion.",
+      "Plants a theme early as foreshadowing and holds back a romantic theme until late in the story, then states it clearly.",
+      "Pulls the score back and lets sound design carry a scene when restraint is more powerful.",
+      "Uses solo musicians for intimate moments and full orchestra with choir for big scenes, adding modern electronics only in 'sweet spots' where they do not overwhelm."
+    ],
+    "params": {
+      "bpm": [80, 130],
+      "mode": "minor",
+      "harmony": "Minor-key triads with modal mixture; rhythmic string ostinato (cello-led) under simple harmony that grows by adding orchestra rather than by changing chords.",
+      "progressions": ["i VII VI VII", "i III VII VI", "i iv v i"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 8,
+      "layers": {"strings": 1.0, "piano": 0.3, "choir": 0.3, "glass": 0.0, "pluck": 0.2, "sub": 0.3, "brass": 0.4, "synth_pad": 0.1},
+      "chord_every_seconds": 4,
+      "hits_per_minute": 30,
+      "dynamics": "slow-build",
+      "drums": "Percussive ticking pulse, low war drums and taiko-style hits in big cues; used sparingly in intimate cues."
+    },
+    "sources": [
+      "https://www.awardsdaily.com/?p=202526",
+      "https://www.kunc.org/post/game-thrones-composer-ramin-djawadi-melodies-stick",
+      "https://www.berklee.edu/berklee-now/news/behind-the-scenes-with-game-of-thrones-composer-ramin-djawadi",
+      "https://www.hollywoodreporter.com/live-feed/game-thrones-ramin-djawadi-score-explained-1199740"
+    ],
+    "notes": "Rhythm-first title building, cello choice, ticking pulse, Morse-like patterns and instrument/emotion split are sourced (Awards Daily, KUNC, Berklee). Hollywood Reporter link seen in search only. Ostinato rate, bpm and harmony are conservative inferences; interviews give no numbers."
+  },
+  {
+    "id": "britell",
+    "name": "Nicholas Britell",
+    "kind": "film",
+    "known_for": "Succession, Moonlight, If Beale Street Could Talk, Andor, Don't Look Up; Emmy winner; classical pianist with a hip-hop sensibility.",
+    "techniques": [
+      "Blends oversize hip-hop beats and 808s with a dark, courtly classical sound, using the beat sparingly at key moments (main title, a character's entrance) rather than constantly.",
+      "Keeps piano and strings deliberately off-kilter or slightly out of tune so music that sounds 'right' for the family feels wrong.",
+      "Grows the main theme from a chord progression with a baroque (1700s) feel, then writes new variations on the same chords each season.",
+      "Sets a different tempo and character per season (allegro, adagio, scherzo) to reimagine the sound from year to year.",
+      "Introduces a new instrumentation (for example a choir) for a key scene to do something the show has not done before.",
+      "Links a character's musical taste (hip-hop) to the score so the genre mix is motivated by the story."
+    ],
+    "params": {
+      "bpm": [60, 140],
+      "mode": "minor",
+      "harmony": "Baroque and classical-flavored minor progressions (sequences, circle-of-fifths motion, Andalusian-style descents) on piano and strings, with trap-style sub-bass hits laid over.",
+      "progressions": ["i iv V i", "i VII VI V", "i VI iv V"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 8,
+      "layers": {"strings": 0.8, "piano": 0.8, "choir": 0.1, "glass": 0.0, "pluck": 0.2, "sub": 0.5, "brass": 0.3, "synth_pad": 0.1},
+      "chord_every_seconds": 4,
+      "hits_per_minute": 30,
+      "dynamics": "terraced",
+      "drums": "Sparse oversize hip-hop kick/808 and snare drops at key beats (not a constant groove); optional trap hi-hats; otherwise none."
+    },
+    "sources": [
+      "https://www.wunc.org/2023-05-25/how-composer-nicholas-britell-created-the-sound-of-succession",
+      "https://www.thewrap.com/succession-composer-nicholas-britell-logan-roy-death-score-interview/",
+      "https://www.goldderby.com/video/nicholas-britell-interview-succession/",
+      "https://www.grammy.com/news/nicholas-britell-succession-king-learning-from-steve-mcqueen/"
+    ],
+    "notes": "Sourced mainly from the NPR/WUNC piece on Succession; Gramophone article blocked, Grammy and Gold Derby seen in search only. Only 6 techniques have solid sourcing. bpm, harmony specifics and chord timing are conservative inferences. 'Trap' was not mentioned as a term by Britell in the sources read; 808s and hip-hop beats were."
+  },
+  {
+    "id": "williams",
+    "name": "John Williams",
+    "kind": "film",
+    "known_for": "Star Wars, Jaws, Indiana Jones, E.T., Jurassic Park, Schindler's List, Harry Potter; five Oscars.",
+    "techniques": [
+      "Uses a Wagner-style leitmotif system: a short recognizable motif per character, place or idea, transformed (changed key, tempo, orchestration) through the score.",
+      "Builds heroic themes from fanfare-like, arpeggiated figures with leaps of fourths, fifths and sevenths, and uses dotted, march-like rhythms for introductions.",
+      "Gives the theme to the brass, often low, supported by fast repeated notes from other brass; imitation passed between sections.",
+      "Doubles strings with celesta for a bright, music-box sparkle; layers trills, pianissimo effects and added-note chords over flutes and strings in an impressionist way.",
+      "Alternates chords or keys a third apart that share a common note, and uses stacked fourths, for tonal surprise and a sense of wonder.",
+      "Keeps harmony mostly diatonic, pushes it to the edge of atonality for danger, and uses few perfect cadences.",
+      "Writes most themes at allegro for action and slower andante tempos for emotion, almost never adagio.",
+      "Uses pedal tones (tonic or dominant) under brass and develops a small motif fluidly across a whole score."
+    ],
+    "params": {
+      "bpm": [80, 150],
+      "mode": "major",
+      "harmony": "Largely diatonic with chromatic-mediant shifts (chords or keys a third apart sharing a note), quartal sonorities, pedal tones under brass, few perfect cadences; clear functional harmony in heroic cues.",
+      "progressions": ["I bVII IV I", "I bVI bVII I", "i bVI i bIII"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 8,
+      "layers": {"strings": 0.8, "piano": 0.1, "choir": 0.2, "glass": 0.3, "pluck": 0.2, "sub": 0.1, "brass": 0.9, "synth_pad": 0.0},
+      "chord_every_seconds": 2,
+      "hits_per_minute": 40,
+      "dynamics": "terraced",
+      "drums": "Orchestral timpani, snare and cymbal accents punctuating brass; march rhythms in heroic cues; percussion-light in wonder cues."
+    },
+    "sources": [
+      "https://brahms.ircam.fr/en/composer/john-williams/workcourse",
+      "https://lpo.org.uk/wp-content/uploads/2022/12/John-Williams-Star-Wars-Main-Theme.pdf",
+      "https://filmmusicnotes.com/?p=1818",
+      "https://www.classicfm.com/composers/williams/what-makes-star-wars-soundtrack-music-so-good-analysis/"
+    ],
+    "notes": "Sourced from musicological analysis (IRCAM, LPO study pack, Film Music Notes) not from Williams interviews, because Williams rarely gives technique interviews. No Berklee or Film Music Magazine material was found. Classic FM page was seen in search but could not be fetched. Ignore SEO-style pages with invented statistics."
+  },
+  {
+    "id": "morricone",
+    "name": "Ennio Morricone",
+    "kind": "film",
+    "known_for": "Dollars Trilogy, Once Upon a Time in the West, The Good the Bad and the Ugly, The Mission, Cinema Paradiso era; Oscar for The Hateful Eight.",
+    "techniques": [
+      "Treats every sound as potentially musical: whip cracks, bells, footsteps, a ringing phone, dripping water and a typewriter are written into the score as instruments.",
+      "Uses normal or historical instruments to make completely different sounds, rather than relying on exotic instruments.",
+      "Gives characters distinct solo timbres (for example a flute, an ocarina or a voice) so identity is carried by color instead of key.",
+      "Uses unusual lead voices (a whistle, solo voice, electric guitar with heavy reverb or echo) in place of violins or woodwinds, producing an open, reverberant sense of space.",
+      "Uses the human voice as percussion and texture (calls, grunts, wordless vocals) instead of a harmonic choir.",
+      "Writes dissonant, non-melodic lines blended with jazz, lullaby-like and screeching textures for thrillers.",
+      "Pre-scores from the script or treatment and writes before filming, sometimes before seeing images, and handles every step of the orchestration himself.",
+      "Combines historical and ethnic strands (period instrumentation, liturgical rules, native tradition) for scores set in a specific place and time."
+    ],
+    "params": {
+      "bpm": [60, 140],
+      "mode": "mixed",
+      "harmony": "Modal and simple triads with sudden chromatic or modal shifts, slow lyrical melody over pedal tones, choir or solo color blocks, dissonant jazz-tinged clusters in thriller cues.",
+      "progressions": ["i bVII i", "I bVII IV I", "i iv V i"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 8,
+      "layers": {"strings": 0.6, "piano": 0.1, "choir": 0.5, "glass": 0.1, "pluck": 0.7, "sub": 0.0, "brass": 0.4, "synth_pad": 0.0},
+      "chord_every_seconds": 5,
+      "hits_per_minute": 30,
+      "dynamics": "terraced",
+      "drums": "Colorful percussion: whip cracks, bells, anvil, timpani and sparse snare used as texture and punctuation."
+    },
+    "sources": [
+      "https://www.bfi.org.uk/sight-and-sound/interviews/if-you-want-call-yourself-composer-you-follow-every-step-instrumentation-ennio-morricone-interviewed-2006",
+      "https://thequietus.com/?p=4050",
+      "https://wirednews.pages.dev/2015/12/ennio-morricone-hateful-eight-soundtrack",
+      "https://blog.richmond.edu/mus122-02/?p=65"
+    ],
+    "notes": "The BFI 2006 interview is the strong source (found sounds, pre-scoring, orchestration control, every sound as music). The Quietus and Wired links were seen in search only. Timbre-per-character and guitar/whistle points come from lower-authority analysis blogs and are interpretive. Harmony, bpm and chord timing are conservative inferences."
+  },
+  {
+    "id": "gudnadottir",
+    "name": "Hildur Guðnadóttir",
+    "kind": "film",
+    "known_for": "Oscar for Joker, Emmy and Grammy for Chernobyl, Tar; experimental cellist and composer.",
+    "techniques": [
+      "Field-records real spaces on location (mid-side microphone array plus contact mics) and treats the building itself as the instrument.",
+      "Mines long recordings for small sonic 'nuggets', then pitches them down, stretches them and shapes them into tones, melodies hidden in overtones, and rhythmic material.",
+      "Turns a recorded tonal drone into a rhythmic groove by slowing it on tape machines and using transient shapers to emphasize its dynamics.",
+      "Prefers tape for extreme slowdowns because its noise becomes part of the sound, while digital time-stretching can sound brittle.",
+      "Avoids conventional drama scoring (no string orchestra, piano or pads) to make 'factual music more than fictional music'.",
+      "Passes vocalizations and recordings through the convolution reverb of the real space so the music carries the place's acoustic fingerprint.",
+      "Sketches music alongside the edit so it becomes part of the production's DNA, splitting the work between melody/harmony and sound-design concepts."
+    ],
+    "params": {
+      "bpm": [40, 70],
+      "mode": "minor",
+      "harmony": "Static drones and slow low clusters; harmony emerges from overtones of processed recordings rather than from chord progressions.",
+      "progressions": ["i bII i", "i iv i"],
+      "ostinato": "none",
+      "pulse": false,
+      "drone": true,
+      "arp_rate": 0,
+      "layers": {"strings": 0.3, "piano": 0.0, "choir": 0.3, "glass": 0.2, "pluck": 0.0, "sub": 0.8, "brass": 0.1, "synth_pad": 0.6},
+      "chord_every_seconds": 16,
+      "hits_per_minute": 3,
+      "dynamics": "slow-build",
+      "drums": "none; industrial rhythm only from processed field recordings (slowed drone turned into a groove)."
+    },
+    "sources": [
+      "https://www.soundonsound.com/people/hildur-gudnadottir-sam-slater",
+      "https://womenandhollywood.com/composer-to-watch-hildur-gudnadottir-of-joker-and-chernobyl/",
+      "https://www.premiumbeat.com/blog/film-score-composer-hildur-gudndottir/",
+      "https://popdisciple.com/interviews/hildur-gudnadottir"
+    ],
+    "notes": "Chernobyl process is well sourced (Sound On Sound). The articles read do not describe Joker cello technique, so no cello-specific technique is listed. Harmony, bpm and timing params are conservative inferences. Convolution-reverb point comes from a journal article cited in search results."
+  },
+  {
+    "id": "nature_doc",
+    "name": "Big nature documentary scoring (Planet Earth II, Our Planet, Blue Planet)",
+    "kind": "film",
+    "known_for": "Planet Earth II (Hans Zimmer, Jacob Shea, Jasha Klebe), Our Planet (Steven Price), The Blue Planet (George Fenton); Emmy-nominated large-scale scoring under Attenborough narration.",
+    "techniques": [
+      "Writes a big, recognizable main theme and returns to it in varied styles, with smaller themes tied to specific sequences or habitats.",
+      "Gives each habitat its own palette: glassy or icy strings and synths for frozen worlds, massed humming voices for jungle, synths and tablas with city sounds, ancient-sounding percussion for islands, grand orchestra for mountains.",
+      "Treats the narrator as a lead instrument: carves out the narration's frequency range, writes melodies around its rhythm, and keeps the orchestra supportive.",
+      "Folds field recordings into the score as tones and percussion (stretched wind as a melodic tone, rustling grass as rhythm, processed insect buzz under orchestra).",
+      "Blends layers of electronic texture beneath live orchestra instead of keeping them separate, and shares a sound palette between composers for cohesion.",
+      "Scores animal behavior with timbre: quirky, playful sounds for character moments; tense drum pulses for hunt stand-offs; metallic textures for chases.",
+      "Strips down to intimate violin and piano, removing natural sound effects, for lament moments, with a hopeful undercurrent.",
+      "Builds from small to vast to follow the camera, using orchestra for scale and emotional impact."
+    ],
+    "params": {
+      "bpm": [60, 140],
+      "mode": "mixed",
+      "harmony": "Open, wide-voiced diatonic harmony with suspended chords and rising sequences into swelling climaxes; minor and chromatic color for peril and chase; sparse harmony under narration.",
+      "progressions": ["I V vi IV", "vi IV I V", "I iii IV V"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 8,
+      "layers": {"strings": 0.9, "piano": 0.4, "choir": 0.4, "glass": 0.3, "pluck": 0.3, "sub": 0.3, "brass": 0.5, "synth_pad": 0.4},
+      "chord_every_seconds": 6,
+      "hits_per_minute": 20,
+      "dynamics": "slow-build",
+      "drums": "Percussion for tension in hunts and chases (drum pulses, metallic hits), world percussion by habitat, none in lyrical or lament cues."
+    },
+    "sources": [
+      "https://www.televisionacademy.com/features/news/mix/earth-wind-and-choir",
+      "https://www.motionpictures.org/2017/08/emmy-nominated-planet-earth-ii-composers-scoring-most-interesting-animals-world/",
+      "https://www.motionpictures.org/2019/04/our-planets-composer-scores-natures-astonishing-variety-and-fragility/",
+      "https://filmmusicreporter.com/2016/06/02/hans-zimmer-jasha-klebe-jacob-shea-scoring-bbcs-planet-earth-ii/",
+      "https://www.classical-music.com/features/articles/best-scores-natural-history-programmes/"
+    ],
+    "notes": "Habitat palettes, narration spacing and field-recording use are sourced (Television Academy, Motion Picture Association). Harmony, tempo and chord timing are NOT discussed by the sources, so those params are generic conservative values (Price's article explicitly omits tempo/harmony). Blue Planet / George Fenton details are weak: only general facts (BBC Concert Orchestra, music as emotional subtext) were found."
+  },
+  {
+    "id": "true_crime_doc",
+    "name": "True-crime / investigative documentary underscore",
+    "kind": "film",
+    "known_for": "Netflix and streaming true-crime series and docs (for example Ted Bundy, Gacy, Surviving R. Kelly, Leaving Neverland, Unsolved Mysteries and Monsters-style dramatizations); a convention set rather than one composer.",
+    "techniques": [
+      "Writes in the lower string range (cello, bass) with extended bowing such as pressing too hard or too lightly, so the tone is rough and gut-level rather than clean.",
+      "Lets pitch blur in low registers so strings become a sound world and texture rather than a recognizable instrument.",
+      "Uses lingering pads and drones with softly bowed strings and a slow, glacial pace to build suspense and intrigue without a beat.",
+      "Pairs a sparse piano with strings underneath whose pitch wavers to create unease.",
+      "Aims for empathy with victims (humanness, sadness) instead of fear, avoids menacing cues and does not foreshadow the offender's later persona.",
+      "Chooses bespoke scoring over generic library 'crime show' cues, and in some cases avoids stock subdued drones altogether for a distinctive voice.",
+      "Uses uncomfortably low registers and heavy rhythms to give weight, and sometimes solo voices as a haunting color.",
+      "Leaves lots of space and uses restraint so interviews and archival audio stay in front."
+    ],
+    "params": {
+      "bpm": [50, 90],
+      "mode": "minor",
+      "harmony": "Static or slowly shifting minor, unresolved suspensions, low drones and pedal tones, few cadences; cluster or detuned color for unease.",
+      "progressions": ["i bII i", "i iv i", "i bVI i"],
+      "ostinato": "none",
+      "pulse": false,
+      "drone": true,
+      "arp_rate": 0,
+      "layers": {"strings": 0.8, "piano": 0.5, "choir": 0.1, "glass": 0.3, "pluck": 0.1, "sub": 0.6, "brass": 0.0, "synth_pad": 0.6},
+      "chord_every_seconds": 12,
+      "hits_per_minute": 3,
+      "dynamics": "sparse",
+      "drums": "none; occasional low heartbeat-style hits or soft impacts only for emphasis."
+    },
+    "sources": [
+      "https://nofilmschool.com/ted-bundy-composer-ariel-marx-interview",
+      "https://variety.com/2019/music/news/leaving-neverland-surviving-r-kelly-music-score-composers-interview-1203167261",
+      "https://variety.com/2025/tv/focus/scores-adolescence-monsters-lyle-and-erik-menendez-story-1236417474",
+      "https://alibimusic.com/album/alibi-music-minimal-crime-underscores",
+      "https://www.postmagazine.com/Publications/Post-Magazine/2021/May-June-2021/Soundtrack-I-American-Murder-The-Family-Next-Doo.aspx"
+    ],
+    "notes": "WEAK SOURCING. The No Film School Ariel Marx interview was read in full; the Variety, Alibi Music, Post Magazine and Gacy-doc points come from search-result summaries (Variety 402-blocked). No Making a Murderer or The Jinx composer interviews were found. bpm, harmony and progressions are conservative convention-level inferences."
+  },
+  {
+    "id": "dre",
+    "name": "Dr. Dre",
+    "kind": "beat",
+    "known_for": "The Chronic, 2001, Eminem and Snoop Dogg productions, Straight Outta Compton era; defined West Coast G-funk and polished hip-hop mixing; Beats co-founder.",
+    "techniques": [
+      "Builds beats from scratch on an MPC (not sample loops) so every drum part is on its own track and can be rebalanced later.",
+      "Keeps the loop short and repetitive, then adds subtle unique parts (a sound that appears only in the second verse) to keep long sections interesting.",
+      "Layers live-played bass, Fender Rhodes-style chords and string pads over programmed drums; doubles a played bass with a programmed keyboard bass for weight.",
+      "Writes simple, memorable keyboard parts and original melodic compositions, often by dedicated keyboardists, rather than relying on sampled melody.",
+      "Anchors the low end with a tight, punchy kick with weight around 100 to 150 Hz and tightly controlled sub-bass.",
+      "Arranges and mixes at the same time, with Dre calling for parts to be added or brought forward while the track is built.",
+      "Checks mixes in mono or on small speakers and blends analog console warmth with digital precision.",
+      "G-funk lineage: slow, funky parts with analog synth bass and P-Funk-style synth lead, layered on 808/SP-1200 drum sounds."
+    ],
+    "params": {
+      "bpm": [85, 105],
+      "mode": "minor",
+      "harmony": "One- or two-chord vamps, minor 7ths, slow harmonic rhythm, synth bass that follows the root with passing tones; simple keyboard hook on top.",
+      "progressions": ["i7 iv7", "i7 bVII", "i bVI V"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 0,
+      "layers": {"strings": 0.2, "piano": 0.6, "choir": 0.0, "glass": 0.0, "pluck": 0.2, "sub": 0.8, "brass": 0.0, "synth_pad": 0.4},
+      "chord_every_seconds": 5,
+      "hits_per_minute": 115,
+      "dynamics": "steady",
+      "drums": "Mostly straight to lightly swung (about 50 to 54 percent), tight punchy kick, crisp snare or clap on 2 and 4, programmed on an MPC with each part separate; hits_per_minute counts kick+snare events."
+    },
+    "sources": [
+      "https://www.soundonsound.com/techniques/producing-eminem-fiona-apple",
+      "https://create.routenote.com/blog/producer-profile-dr-dre/",
+      "https://www.mixonline.com/recording/music-production/dr-dre-updates-his-studio-nuthin-but-an-ssl-thang",
+      "https://masteringthemix.com/blogs/learn/decoding-the-mix-4-the-king-of-hip-hop",
+      "https://www.dubcnn.com/connect/index.php/topic,342732.0.html"
+    ],
+    "notes": "The Sound On Sound piece (engineer/bassist Mike Elizondo describing Dre's sessions) is the strongest source; RouteNote profile is secondary; the kick-weight point comes from a third-party mix tutorial, not Dre. Studio Sound 2001 interview was not read. bpm, mode, swing, harmony and hit counts are conservative inferences. Treat as medium sourcing."
+  },
+  {
+    "id": "dilla",
+    "name": "J Dilla",
+    "kind": "beat",
+    "known_for": "Slum Village, Common, A Tribe Called Quest and Erykah Badu productions, the Donuts album; MPC3000 feel that reshaped hip-hop timing.",
+    "techniques": [
+      "Switches quantize off (or nudges notes by hand) so hits sit slightly before or behind the grid instead of locked to it.",
+      "Applies a gentle swing, roughly 53 to 56 percent on eighth notes, and treats each drum element differently: kicks loose and uneven, snares slightly early or late, hi-hats dragged.",
+      "Offsets kick and snare by milliseconds in opposite directions so the groove 'stumbles' on purpose (sources disagree on which element drags).",
+      "Builds feel from layered tuplet subdivisions (quintuplet and septuplet hats, flams on the snare) rather than a straight sixteenth grid.",
+      "Keeps bass notes off the grid and sometimes loops over odd lengths (five beats) so the pattern feels like it is breathing.",
+      "Draws harmony from soulful, jazz-tinged and dusty keyboard material and chops it with the same loose timing.",
+      "Glues the groove with drive and gentle compression on the drum bus for a gritty, warm sound.",
+      "Plays beats by hand on pads and leaves the imperfections in rather than correcting them."
+    ],
+    "params": {
+      "bpm": [80, 100],
+      "mode": "mixed",
+      "harmony": "Jazzy extended chords (minor 7, 9, 11 voicings) in 2- to 4-bar loops, Rhodes-like keys, slow harmonic rhythm, bass that floats against the beat.",
+      "progressions": ["i7 iv7", "ii7 V7 Imaj7", "i7 bVII7"],
+      "ostinato": "none",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 0,
+      "layers": {"strings": 0.2, "piano": 0.8, "choir": 0.0, "glass": 0.0, "pluck": 0.3, "sub": 0.7, "brass": 0.0, "synth_pad": 0.3},
+      "chord_every_seconds": 5,
+      "hits_per_minute": 100,
+      "dynamics": "steady",
+      "drums": "Swing about 54 to 58 percent on 8ths/16ths, quantize off, kick and snare pushed a few to ~20 ms off grid in opposite directions, dragged hats, flams on snare/rim, dusty drum samples; hits_per_minute counts kick+snare events."
+    },
+    "sources": [
+      "https://create.routenote.com/blog/the-dilla-swing-how-one-producer-humanised-the-sound-of-hip-hop/",
+      "https://www.attackmagazine.com/technique/beat-dissected/drunk-drummer-style-grooves/",
+      "https://www.attackmagazine.com/features/interview/roger-linn-swing-groove-magic-mpc-timing/3/",
+      "https://www.musicradar.com/news/pioneers-j-dilla",
+      "https://mixdownmag.com.au/features/gear-rundown-j-dilla/"
+    ],
+    "notes": "Swing numbers (53 to 56 percent) come from RouteNote with a caveat that exact methods are debated; Roger Linn (Attack) only mentions 58 and 62 percent as hard-to-play-live swings. Sources disagree on whether snares are early or late; MusicRadar and Mixdown article bodies could not be read in full. bpm 80 to 100 is a conservative inference from the Attack tutorial's 90 BPM; chord and hit counts are inferences."
+  },
+  {
+    "id": "metro",
+    "name": "Metro Boomin",
+    "kind": "beat",
+    "known_for": "Future, 21 Savage, Migos, Kendrick Lamar and Drake hits; Heroes & Villains, the Spider-Verse soundtrack; defines dark, cinematic modern trap.",
+    "techniques": [
+      "Usually starts with synths or chords (about eight in ten beats) and brings drums in midway, then adds further sounds on top.",
+      "Writes short, minor-key phrases with few notes and lots of space, often on piano or eerie synths, and lets reverb and delay tails fill the gaps.",
+      "Layers dark ambient textures: detuned pads, reversed synths, long-decay reverb and tempo-synced delays set back in the mix.",
+      "Keeps 808s massive but clean: sidechain against the kick, add saturation so they translate on small speakers, keep them mono.",
+      "Programs fast, syncopated hi-hats with rolls and pitch, delay or filter automation, keeping drums sparse but impactful.",
+      "Uses effects as arrangement: reversed snares, pitch-dropped vocal stabs and risers into drops to break repetition.",
+      "Scales up trap with real orchestral strings, gospel-style choir, horns and live orchestra (with an arranger) for cinematic projects.",
+      "Builds melodic content directly into the beat and prefers original composition over samples."
+    ],
+    "params": {
+      "bpm": [130, 160],
+      "mode": "minor",
+      "harmony": "Minor key, one to four chords, inverted voicings pitched down to darken; sparse piano or synth phrases with space between notes; occasional choir and strings swell.",
+      "progressions": ["i VI III VII", "i III VII VI", "i iv v i"],
+      "ostinato": "16ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 0,
+      "layers": {"strings": 0.4, "piano": 0.6, "choir": 0.4, "glass": 0.3, "pluck": 0.3, "sub": 1.0, "brass": 0.2, "synth_pad": 0.6},
+      "chord_every_seconds": 3.4,
+      "hits_per_minute": 140,
+      "dynamics": "terraced",
+      "drums": "Half-time trap: clap/snare on beat 3 of each bar at the written tempo, sparse kicks, 1/16 to 1/32 hi-hat rolls with velocity and pitch variation, long gliding 808; swing 0 percent (straight); hits_per_minute counts kick+snare events."
+    },
+    "sources": [
+      "https://www.vice.com/da/article/metro-boomin-interview-metro-thuggin/",
+      "https://www.cedarsoundstudios.com/blogs/news/how-to-mix-like-metro-boomin-using-the-right-sample-pack",
+      "https://www.grammy.com/news/how-metro-boomin-became-in-demand-rap-producer-2024-grammys",
+      "https://melodics.com/blog/what-daw-does-metro-boomin-use",
+      "https://ca.news.yahoo.com/hitmaker-month-johan-lenox-brings-195348458.html"
+    ],
+    "notes": "WEAK-TO-MEDIUM SOURCING. Only the Vice interview is first-person; the production tips come from a sample-pack company blog (Cedar), Melodics and a Grammy.com profile. No verified BPM from Metro himself: 130 to 160 is a conservative range for modern trap (a tutorial used 162 BPM). Rolling Stone's 'trap symphony' article could not be fetched (paywall). Orchestral arrangement was by Johan Lenox on Heroes & Villains."
+  },
+  {
+    "id": "timbaland",
+    "name": "Timbaland",
+    "kind": "beat",
+    "known_for": "Aaliyah, Missy Elliott (Supa Dupa Fly), Jay-Z, Justin Timberlake (FutureSex/LoveSounds); stuttering, syncopated rhythms with unusual sounds.",
+    "techniques": [
+      "Writes stuttering, syncopated kick patterns and highly gated basic drum sounds, with rapid hi-hats borrowed from southern bass music.",
+      "Often starts a beat by beatboxing or singing the rhythm into a microphone, then recreates it with sounds.",
+      "Loads drum racks without looking, so random pad assignments push him toward unexpected rhythms.",
+      "Uses pitched vocal samples, world instruments and found sounds as rhythmic and melodic elements, not just as decoration.",
+      "Keeps arrangements minimal; complexity lives in the rhythm, using very few sounds (a hit with only three sounds is cited as an example).",
+      "Pulls the snare onto its own track to match it to the kick and give it extra punch.",
+      "Starts from a sampler workflow (early on an Ensoniq ASR-10) with hardware workstation sounds and lets the groove be strange rather than polished."
+    ],
+    "params": {
+      "bpm": [85, 115],
+      "mode": "minor",
+      "harmony": "Static one- or two-chord vamps; melody carried by rhythmic synth or vocal-sample riffs in minor pentatonic or blues-tinged scales; harmony minimal.",
+      "progressions": ["i", "i bVII", "i iv"],
+      "ostinato": "16ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 0,
+      "layers": {"strings": 0.1, "piano": 0.1, "choir": 0.2, "glass": 0.3, "pluck": 0.6, "sub": 0.7, "brass": 0.0, "synth_pad": 0.3},
+      "chord_every_seconds": 4,
+      "hits_per_minute": 130,
+      "dynamics": "terraced",
+      "drums": "Stuttering syncopated kicks, gated punchy snare, rapid ticking hats, off-beat percussion and vocal-sound hits; mild swing (about 50 to 56 percent, inferred); hits_per_minute counts kick+snare events."
+    },
+    "sources": [
+      "https://www.masterclass.com/articles/how-timbaland-make-a-beat-in-4-steps",
+      "https://www.musicradar.com/artists/producers-engineers/timbaland-metro-boomin-pharrell",
+      "https://wavs.com/producer-directory/timbaland",
+      "https://drummerszone.com/artists/timothy-z-timbaland-mosley/10909/profile/",
+      "https://musicthing.blogspot.com/2004/09/friday-is-timbaland-day-pt-2-how-tim.html"
+    ],
+    "notes": "WEAK-TO-MEDIUM SOURCING. MasterClass, MusicRadar and WAVS points come from search-result summaries (MasterClass and MusicRadar pages could not be fully read); gear details at musicthing are partly unverified comments. A Sound On Sound interview with his engineer Jimmy Douglas was referenced but not found. bpm, mode, harmony and swing are conservative inferences."
+  },
+  {
+    "id": "neptunes",
+    "name": "The Neptunes (Pharrell Williams & Chad Hugo)",
+    "kind": "beat",
+    "known_for": "Britney Spears, Snoop Dogg, Jay-Z, Kelis, Clipse, N.E.R.D.; sparse, bright, minimalist hit-making in the 2000s.",
+    "techniques": [
+      "Programs beats on a hardware workstation (Korg 01/W style) that triggers synth modules, leaning on stock presets (clavinet, guitar-like tones) rather than elaborate patches.",
+      "Cuts kicks, snares and hats from old breakbeat records and loads them into a sampler as the drum kit.",
+      "Programs kick and snare first, then adds played 'bucket' percussion behind them and swaps in programmed hits where they need to be tighter.",
+      "Records live drums, cuts tight eight-bar loops from multiple takes and drops in live fills for a live feel.",
+      "Uses a clear build order: beat and vocals first, then synths, then live drums and guitar, then collaborative sculpting.",
+      "Revives old drum and bass sounds and loops a snare to make a stuttering effect.",
+      "Keeps vocal processing minimal (light compression, high-pass, a little hall reverb and quarter-note delay).",
+      "Varies each track on purpose ('there is no Neptunes sound') and merges the artist's style with their own."
+    ],
+    "params": {
+      "bpm": [90, 125],
+      "mode": "mixed",
+      "harmony": "Sparse harmony from one or two chords stabbed on synth presets; short riff-like keyboard figures with lots of space; simple triads with occasional major 7th color.",
+      "progressions": ["I IV", "i bVII", "I vi"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 0,
+      "layers": {"strings": 0.0, "piano": 0.2, "choir": 0.1, "glass": 0.2, "pluck": 0.6, "sub": 0.5, "brass": 0.0, "synth_pad": 0.2},
+      "chord_every_seconds": 4,
+      "hits_per_minute": 130,
+      "dynamics": "sparse",
+      "drums": "Crisp, snappy snare and clap, tight dry kick, bucket or hand-percussion-style fills, many drop-outs; straight to lightly swung (50 to 56 percent, inferred); hits_per_minute counts kick+snare events."
+    },
+    "sources": [
+      "https://theneptunes.org/?p=1094",
+      "https://thefader.com/2015/04/02/beat-construction-pharrell",
+      "https://www.clashmusic.com/features/sound-explorer-chad-hugo-interviewed",
+      "https://www.musicradar.com/news/chad-hugo-neptunes-greatest-songs",
+      "https://www.npr.org/transcripts/258406317"
+    ],
+    "notes": "WEAK-TO-MEDIUM SOURCING. Core workflow comes from a fan-site repost of a Remix magazine interview (theneptunes.org); Fader confirms 'no Neptunes sound' and artist-blending; MusicRadar, Clash and NPR links were not readable and were seen in search only. The original Sound On Sound engineer interview was not located. bpm, harmony, swing and hit counts are conservative inferences."
+  },
+  {
+    "id": "max_martin",
+    "name": "Max Martin",
+    "kind": "beat",
+    "known_for": "Backstreet Boys, Britney Spears, Katy Perry, Taylor Swift, The Weeknd; more than 20 Billboard Hot 100 number ones; Swedish melodic pop.",
+    "techniques": [
+      "Writes melody first and treats it as the hook; builds several hooks in a song so listeners have more than one favorite part.",
+      "Plants a fragment of the chorus melody in the verse as a 'melodic preview', so the chorus feels familiar when it lands.",
+      "Repeats the title phrase or a key lyric across sections as a 'glue hook'.",
+      "Makes adjacent sections contrast sharply (vocal range, vocal rhythm, lyric or production) while keeping one or two shared elements so the listener stays oriented.",
+      "Gets to the chorus early (within roughly the first 50 seconds), a habit he links to dance-club practice.",
+      "Shapes phrases with tension and release, often placing the highest note in the second half of a section.",
+      "Grows choruses: second chorus bigger than the first, final chorus biggest, sometimes layering a contrasting extra part (a 'mega-chorus').",
+      "Fits syllables tightly to the rhythm and varies phrase lengths (for example three-beat phrases over 4/4); can reuse an identical melody across sections while changing chords or energy to disguise it."
+    ],
+    "params": {
+      "bpm": [100, 130],
+      "mode": "mixed",
+      "harmony": "Simple diatonic loops of three or four chords; the melody carries variety; section contrast comes from pitch range, rhythm and production rather than from new harmony.",
+      "progressions": ["I V vi IV", "vi IV I V", "i VI III VII", "i VII VI VII"],
+      "ostinato": "8ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 8,
+      "layers": {"strings": 0.2, "piano": 0.3, "choir": 0.2, "glass": 0.3, "pluck": 0.5, "sub": 0.7, "brass": 0.0, "synth_pad": 0.6},
+      "chord_every_seconds": 2,
+      "hits_per_minute": 150,
+      "dynamics": "terraced",
+      "drums": "Straight (0 percent swing), tight punchy kick and snare/clap, crisp hats; sections defined by drum drop-outs and re-entries; hits_per_minute counts kick+snare events."
+    },
+    "sources": [
+      "https://musicbusinessworldwide.com/how-max-martins-songwriting-techniques-are-used-to-write-hit-after-hit-after-hit",
+      "https://www.hitsongsdeconstructed.com/events/the-melody-hook-writing-of-max-martin-2026/",
+      "https://americansongwriter.com/all-those-pop-songs-you-love-thats-not-magic-thats-melodic-math-and-this-is-how-it-works",
+      "https://qz.com/923149/the-alchemy-of-the-perfect-pop-song-according-to-max-martin-the-genius-songwriter-behind-hits-for-britney-spears-taylor-swift-and-the-weeknd",
+      "https://flypaper.soundfly.com/?p=22055"
+    ],
+    "notes": "MEDIUM-WEAK SOURCING. Most of the 'melodic math' vocabulary is from analyst Asaf Peres and commercial courses (Hit Songs Deconstructed), not Max Martin himself; Martin and collaborators say there are no fixed rules. MBW and American Songwriter were readable; chord habits and tempo are NOT covered, so bpm (his hits range from ~100 to 171 BPM), harmony and progressions are conservative generic pop values."
+  },
+  {
+    "id": "shortform_retention",
+    "name": "Short-form video retention music practices (MrBeast-style pacing, trending audio)",
+    "kind": "shortform",
+    "known_for": "Synthesis of retention-editing practice from MrBeast-style YouTube editing, TikTok, Reels and Shorts; not a single composer.",
+    "techniques": [
+      "Hit within the first 1 to 3 seconds with a recognizable beat, vocal hook or burst of energy; avoid long ambient intros and gradual fades.",
+      "Choose tracks with clear percussive beat markers (kicks, claps, bass hits) so cuts, captions and visual changes can land on the beat; align key visual moments to beats or lyrics.",
+      "Reach the main moment or drop within seconds rather than after a long build, so a 15 to 30 second cut contains high-energy material.",
+      "Keep dynamics contrasting: beat switches, added vocal layers, bass drops or rhythmic shifts keep the edit active; flat tracks feel static when looped.",
+      "Introduce something new every few seconds (a new visual, sound or piece of information); pace is how often novelty arrives, not how fast the cuts are.",
+      "Use risers, whooshes and clicks as accents before a reveal, and sometimes cut the music completely after loud energy so the key moment lands (but avoid unintended dead air).",
+      "Use separate music beds for intro, building tension, reveal and resolution; duck music under voiceover and raise it for montages and transitions.",
+      "Make endings loop-friendly: avoid dramatic final cadences, keep consistent rhythm or sustained textures, and design transitions that lead back to the opening beat."
+    ],
+    "params": {
+      "bpm": [100, 150],
+      "mode": "mixed",
+      "harmony": "Loop-based one- to four-chord patterns in 2- to 4-bar loops with minimal melodic resolution so they loop cleanly; change energy with layers and drum changes instead of chord changes.",
+      "progressions": ["i VI III VII", "I V vi IV", "i VII VI VII"],
+      "ostinato": "16ths",
+      "pulse": true,
+      "drone": false,
+      "arp_rate": 16,
+      "layers": {"strings": 0.0, "piano": 0.2, "choir": 0.1, "glass": 0.2, "pluck": 0.5, "sub": 0.9, "brass": 0.0, "synth_pad": 0.4},
+      "chord_every_seconds": 2,
+      "hits_per_minute": 160,
+      "dynamics": "terraced",
+      "drums": "Immediate punchy kick and clap on every beat marker; beat switch, drop or fill every 3 to 8 seconds; a riser plus 0.3 to 1 second of near-silence before a reveal; hits_per_minute counts kick+snare events."
+    },
+    "sources": [
+      "https://blog.audionetwork.com/the-edit/music/music-for-vertical-video",
+      "https://blog.autonolab.com/blog/2025-07-23-editing-as-the-final-rewrite-pace-contrast-and-sonic-architecture/",
+      "https://vidpros.com/retention-editing-what-you-can-learn-from-mario-joos/",
+      "https://www.shortimize.com/blog/analyze-tiktok-video-how-your-audio-choices-affect-viewer-retention",
+      "https://livecounts.io/blog/youtube/how-mrbeast-uses-pattern-interrupts-every-4-seconds"
+    ],
+    "notes": "WEAK SOURCING. No direct MrBeast editor or sound-designer interview was found; sources are editing and marketing blogs (Audio Network, Autonolab, Shortimize, a VidPros summary of ex-MrBeast retention strategist Mario Joos, Livecounts). Silence-before-reveal and risers are supported only by blog analysis; specific cut-rate claims (such as a visual change every 1.1 seconds) are unverified and were not used. Ranges (bpm, hits, section timing) are conservative practice-level values. Joos says pacing is about information, not cut speed, and that fast cuts need a purpose."
+  }
+]

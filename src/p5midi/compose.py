@@ -208,12 +208,14 @@ def _validated(ai: AI, messages: list[dict], max_seconds, tries: int = 3, valida
 
 
 def compose(idea: str, ai: AI | None = None, max_seconds: float | None = None,
-            catalog: dict | None = None, validate=None) -> tuple[dict, dict]:
-    """Returns (spec, token usage)."""
+            catalog: dict | None = None, validate=None, style: str | None = None) -> tuple[dict, dict]:
+    """Returns (spec, token usage). style: an id from the influence database (p5midi styles)."""
+    from . import styles as _styles
     ai = ai or AI.from_env()
     catalog = catalog or template_catalog()
     max_bars = int((max_seconds or 240) * 140 / 240) if max_seconds else 96
-    messages = [{'role': 'system', 'content': _system(catalog, max_bars)},
+    extra = ('\n\n' + _styles.brief(_styles.get(style))) if style else ''
+    messages = [{'role': 'system', 'content': _system(catalog, max_bars) + extra},
                 {'role': 'user', 'content': json.dumps({'idea': idea.strip()[:2000],
                  'length': f'about {int(max_seconds)} seconds' if max_seconds else '1.5 to 3 minutes'})}]
     return _validated(ai, messages, max_seconds, validate=validate)

@@ -96,7 +96,8 @@ def cut_lines(cuts: list[float], duration: float) -> list[dict]:
     return [{'start': round(a, 2), 'end': round(b, 2), 'text': f'[shot {i + 1}]'} for i, (a, b) in enumerate(zip(pts, pts[1:]))]
 
 
-def plan_cues(lines: list[dict], regions: list[dict], duration: float, ai=None, title: str = '', brief: str = '') -> dict:
+def plan_cues(lines: list[dict], regions: list[dict], duration: float, ai=None, title: str = '', brief: str = '',
+              style: str | None = None) -> dict:
     """AI cue sheet, validated; falls back to a heuristic plan if the AI is unavailable or wrong."""
     try:
         from .compose import AI, parse_json
@@ -104,9 +105,19 @@ def plan_cues(lines: list[dict], regions: list[dict], duration: float, ai=None, 
         ask = {'title': title, 'brief': brief or 'documentary underscore', 'duration': round(duration, 2),
                'regions': [{k: r[k] for k in ('start', 'end', 'kind')} for r in regions],
                'narration': [{'t': ln['start'], 'end': ln['end'], 'text': ln['text'][:300]} for ln in lines]}
-        text, _ = ai.chat([{'role': 'system', 'content': DIRECTOR}, {'role': 'user', 'content': json.dumps(ask)}], think=False)
+        from . import styles as _styles
+        system = DIRECTOR
+        if style == 'auto':
+            ask['style_menu'] = _styles.menu('film')
+            system += ('\nAlso pick the composer influence that best fits this film from style_menu: add "style": "<id>" '
+                       'to the JSON.')
+        elif style:
+            system += '\n\n' + _styles.brief(_styles.get(style))
+        text, _ = ai.chat([{'role': 'system', 'content': system}, {'role': 'user', 'content': json.dumps(ask)}], think=False)
         sheet = parse_json(text)
         sheet['source'] = 'ai'
+        if style and style != 'auto':
+            sheet['style'] = style
     except Exception as e:  # no key, network, bad JSON: never block a render
         sheet = heuristic_cues(lines, regions, duration)
         sheet['source'] = f'heuristic ({type(e).__name__}: {str(e)[:100]})'
@@ -199,7 +210,9 @@ def validate_cues(sheet: dict, lines: list[dict], regions: list[dict], duration:
             continue
         hits.append({'t': round(t, 2), 'kind': h.get('kind') if h.get('kind') in HITS else 'swell', 'why': str(h.get('why', ''))[:80]})
         last = t
-    return {'key': f'{root} {mode}', 'cues': merged, 'hits': hits, 'source': sheet.get('source', '')}
+    from . import styles as _styles
+    st = sheet.get('style') if sheet.get('style') in _styles.all_styles() else None
+    return {'key': f'{root} {mode}', 'cues': merged, 'hits': hits, 'source': sheet.get('source', ''), 'style': st}
 
 
 # ---------------------------------------------------------------- 2. composer
@@ -261,8 +274,33 @@ def _change_points(a: float, b: float, lines: list[dict], every: float = 7.0) ->
 
 
 def compose(sheet: dict, lines: list[dict], regions: list[dict], duration: float, title: str = 'Film score') -> dict:
-    """Cue sheet -> a p5midi song spec (template Chillout-Ambient + cinematic kit)."""
+    """Cue sheet -> a p5midi song spec (template Chillout-Ambient + cinematic kit), shaped by the sheet's style."""
+    from . import styles as _styles
+    sty = _styles.get(sheet.get('style')) if sheet.get('style') else None
+    sp = (sty or {}).get('params') or {}
+    layer = sp.get('layers') or {}
+
+    def use(name, default=1.0):
+        try:
+            return float(layer.get(name, default))
+        except (TypeError, ValueError):
+            return default
+    style_prog = [p.split() for p in sp.get('progressions') or [] if isinstance(p, str) and p.split()]
+    try:
+        every = float(sp.get('chord_every_seconds') or 0) or None
+    except (TypeError, ValueError):
+        every = None
+    ost = sp.get('ostinato', 'none') if sty else 'none'
+    ost_step = {'8ths': 0.375, '16ths': 0.1875, 'triplets': 0.25}.get(ost)
+    if ost_step and isinstance(sp.get('bpm'), list) and len(sp['bpm']) == 2:
+        beat = 60.0 / (sum(sp['bpm']) / 2)
+        ost_step = beat / {'8ths': 2, '16ths': 4, 'triplets': 3}[ost]
+    want_drone = bool(sp.get('drone', True)) if sty else True
+    want_pulse = bool(sp.get('pulse', True)) if sty else True
+    arp_rate = sp.get('arp_rate', 8) if sty else 8
     key = sheet['key']
+    if sp.get('mode') == 'major':                    # e.g. nature documentaries, Williams: same root, major colour
+        key = key.split()[0] + ' major'
     root = key.split()[0]
     w = Writer(key)
     kit = palette(root)
@@ -286,10 +324,12 @@ def compose(sheet: dict, lines: list[dict], regions: list[dict], duration: float
             continue
         mood, n = c['mood'], c['intensity']
         prog = PROGS[mood]
-        pts = _change_points(a, b, lines, every=6.5 if mood in ('tension', 'unease') else 7.5)
+        if style_prog and mood not in ('warmth', 'question'):
+            prog = style_prog[sheet['cues'].index(c) % len(style_prog)]
+        pts = _change_points(a, b, lines, every=every or (6.5 if mood in ('tension', 'unease') else 7.5))
         reg = _region_at(regions, a + 0.1)
         sponsor = reg is not None and reg['kind'] == 'sponsor'
-        if 'Drone A' in have and mood in ('unease', 'tension', 'question', 'curiosity', 'neutral') and not sponsor:
+        if want_drone and 'Drone A' in have and mood in ('unease', 'tension', 'question', 'curiosity', 'neutral') and not sponsor:
             w.note('drone', a, theory.note_number(f'{root}4'), min(b - a, 29.0), 58 + 8 * n)   # drone at its own pitch
         for i, t in enumerate(pts):
             end = pts[i + 1] if i + 1 < len(pts) else b
@@ -304,16 +344,24 @@ def compose(sheet: dict, lines: list[dict], regions: list[dict], duration: float
                     k += 1
                 continue
             w.chord('pad', t, low, end - t, 48 + 6 * n)
-            if mood in ('tension', 'unease') and n >= 2:                     # heartbeat pulse, building through the cue
+            if want_pulse and mood in ('tension', 'unease') and n >= 2:      # heartbeat pulse, building through the cue
                 k, steps = 0, max(1, int((end - t) / 0.75))
                 while k < steps:
                     w.note('sub', t + k * 0.75, low[0] - 24, 0.45, 40 + 12 * n * (0.5 + 0.5 * (t + k * 0.75 - a) / max(1, b - a)))
                     k += 1
-            if mood in ('curiosity', 'wonder', 'triumph'):                   # glass arpeggio
+            if ost_step and mood in ('tension', 'unease', 'wonder', 'triumph', 'curiosity') and n >= 2:   # style ostinato
+                pat = [low[0] + 12, low[2] + 12, low[1] + 12, low[2] + 12]
+                inst = 'pluck' if use('pluck', 0.5) >= use('strings') else 'strings'
+                k = 0
+                while t + k * ost_step < end - 0.05:
+                    w.note(inst, t + k * ost_step, pat[k % 4], ost_step * 0.8, 30 + 8 * n * (0.6 + 0.4 * (t - a) / max(1, b - a)))
+                    k += 1
+            if arp_rate and mood in ('curiosity', 'wonder', 'triumph'):      # glass arpeggio
                 arp = [low[0] + 24, low[2] + 24, low[1] + 24, low[2] + 24] if mood != 'wonder' else [low[0] + 24, low[1] + 24, low[2] + 24, low[0] + 36]
                 k = 0
-                while t + k * 0.375 < end - 0.1:
-                    w.note('glass', t + k * 0.375, arp[k % 4], 0.34, 40 + 6 * n)
+                astep = 0.1875 if arp_rate == 16 else 0.375
+                while t + k * astep < end - 0.1:
+                    w.note('glass', t + k * astep, arp[k % 4], astep * 0.9, 40 + 6 * n)
                     k += 1
             if mood == 'tension' and n >= 3:
                 k = 0
@@ -365,6 +413,20 @@ def compose(sheet: dict, lines: list[dict], regions: list[dict], duration: float
     ch = {'drone': 'Drone A', 'boom': 'Boom', 'boom2': 'Boom Short', 'sting': 'Sting', 'riser': 'Reverse Crash', 'pad': 'Pad 1',
           'pad2': 'Pad 2', 'piano': 'Piano', 'strings': 'Strings', 'sub': 'Sub 1', 'glass': 'Glass', 'pluck': 'Pluck', 'choir': 'Choir ahh'}
     mult = {'pluck': 0.45, 'piano': 1.0, 'riser': 1.7, 'sting': 1.0, 'pad2': 1.4}
+    if sty:   # the style's instrument weights: 0 drops a layer, 1 is normal, above 1 louder
+        for part, lname in (('strings', 'strings'), ('piano', 'piano'), ('choir', 'choir'), ('glass', 'glass'),
+                            ('pluck', 'pluck'), ('sub', 'sub'), ('pad', 'synth_pad')):
+            if lname in layer:
+                wgt = use(lname)
+                if wgt < 0.12 and part in w.parts:
+                    w.parts.pop(part)
+                else:
+                    mult[part] = mult.get(part, 1.0) * (0.55 + 0.65 * wgt)
+        if sp.get('dynamics') == 'slow-build':   # the whole score grows toward the end
+            beats_total = duration * BPM / 60
+            for part in w.parts.values():
+                for nt in part:
+                    nt[3] = int(max(1, min(127, nt[3] * (0.8 + 0.35 * nt[0] / max(1, beats_total)))))
     bars = int(duration * BPM / 60 / 4) + 2
     parts = {k: {'type': 'notes', 'channel': ch[k], 'bars': bars, 'notes': sorted(v), 'velocity': mult.get(k, 1.0)}
              for k, v in w.parts.items() if ch[k] in have or ch[k] in ('Reverse Crash', 'Pad 1', 'Pad 2', 'Piano', 'Strings', 'Sub 1')}
@@ -375,12 +437,12 @@ def compose(sheet: dict, lines: list[dict], regions: list[dict], duration: float
 
 # ---------------------------------------------------------------- 3. render
 def score_film(lines: list[dict], regions: list[dict], duration: float, out_dir: str | Path, title: str = 'Film score',
-               ai=None, render: bool = True, step=lambda s: None, brief: str = '') -> dict:
+               ai=None, render: bool = True, step=lambda s: None, brief: str = '', style: str | None = None) -> dict:
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     lines = merge_lines(lines)
     step('planning cues')
-    sheet = plan_cues(lines, regions, duration, ai=ai, title=title, brief=brief)
+    sheet = plan_cues(lines, regions, duration, ai=ai, title=title, brief=brief, style=style)
     (out / 'cue-sheet.json').write_text(json.dumps(sheet, indent=1), encoding='utf-8')
     spec = compose(sheet, lines, regions, duration, title)
     (out / 'score-spec.json').write_text(json.dumps(spec, indent=1), encoding='utf-8')
@@ -421,7 +483,7 @@ SHORT_VIDEO = float(os.environ.get('P5MIDI_SHORT_VIDEO', '180'))
 
 def soundtrack(duration: float, out_dir: str | Path, lines: list[dict] | None = None, regions: list[dict] | None = None,
                title: str = 'Film', brief: str = '', force_score: bool = False, threshold: float = SHORT_VIDEO,
-               render: bool = True, step=lambda s: None) -> dict:
+               render: bool = True, step=lambda s: None, style: str | None = None) -> dict:
     """Omar 11/7: videos shorter than 3 minutes get free-license music; 3 minutes and longer get an FL Studio score."""
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -437,5 +499,5 @@ def soundtrack(duration: float, out_dir: str | Path, lines: list[dict] | None = 
                 'license': f'Mixkit Stock Music Free License {library.LICENSE_URL}'}
         (out / 'music.json').write_text(json.dumps(info, indent=1), encoding='utf-8')
         return info
-    r = score_film(lines or [], regions or [], duration, out, title, render=render, step=step, brief=brief)
+    r = score_film(lines or [], regions or [], duration, out, title, render=render, step=step, brief=brief, style=style)
     return {'mode': 'fl-studio-score', **r}
