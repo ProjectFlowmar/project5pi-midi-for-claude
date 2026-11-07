@@ -1,0 +1,60 @@
+{
+  "title": "Rainy Window",
+  "template": "Chillout",
+  "bpm": 82,
+  "key": "D minor",
+  "progression": ["i9", "iv7", "VIImaj7", "IIImaj7"],
+  "swing": 0.35,
+  "parts": {
+    "drums": {
+      "type": "drums",
+      "channel": "Drums",
+      "bars": 2,
+      "lanes": {
+        "kick":  "x.....x...x..... x.....x.......x.",
+        "snare": "....x.......x..g ....x.......x...",
+        "hat":   "x.o.x.o.x.o.x.o. x.o.x.o.x.o.xgo."
+      },
+      "humanize": 0.4,
+      "velocity": 0.85
+    },
+    "piano": {
+      "type": "chords",
+      "channel": "Piano",
+      "octave": 4,
+      "rhythm": "x-------...x-.--",
+      "humanize": 0.3
+    },
+    "sub": {
+      "type": "bass",
+      "channel": "Sub 1",
+      "octave": 1,
+      "rhythm": "x-----x-----.x--",
+      "velocity": 0.6
+    },
+    "pad": {
+      "type": "chords",
+      "channel": "Pad 1",
+      "octave": 3,
+      "velocity": 0.55
+    },
+    "melody": {
+      "type": "melody",
+      "channel": "Piano",
+      "octave": 5,
+      "notes": [
+        [0, 5, 1.5], [1.5, 4, 0.5], [2, 3, 2],
+        [4, 1, 1], [5, 3, 1], [6, 4, 2],
+        [8, 5, 1.5], [9.5, 6, 0.5], [10, 5, 1], [11, 4, 1],
+        [12, 3, 3], [15, 2, 1]
+      ],
+      "humanize": 0.3
+    }
+  },
+  "arrangement": [
+    {"name": "intro", "bars": 4, "parts": ["piano", "pad"]},
+    {"name": "beat",  "bars": 8, "parts": ["drums", "piano", "sub", "pad"]},
+    {"name": "theme", "bars": 8, "parts": ["drums", "piano", "sub", "pad", "melody"]},
+    {"name": "outro", "bars": 4, "parts": ["piano"]}
+  ]
+}

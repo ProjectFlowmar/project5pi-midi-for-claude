@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "project5pi-midi-for-claude"
+version = "0.1.0"
+description = "Let Claude (or any AI) write, render and check real FL Studio songs from a JSON spec."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Project5pi" }]
+keywords = ["fl studio", "flp", "midi", "music", "mcp", "claude", "ai", "daw"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Topic :: Multimedia :: Sound/Audio :: MIDI",
+  "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.2"]
+dev = ["pytest>=8"]
+
+[project.scripts]
+p5midi = "p5midi.cli:main"
+p5midi-mcp = "p5midi.mcp_server:main"
+
+[project.urls]
+Homepage = "https://github.com/ProjectFlowmar/project5pi-midi-for-claude"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/p5midi"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

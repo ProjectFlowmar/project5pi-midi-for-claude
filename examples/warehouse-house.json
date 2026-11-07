@@ -1,0 +1,24 @@
+{
+  "title": "Warehouse",
+  "template": "EDM-House",
+  "bpm": 124,
+  "key": "F minor",
+  "progression": ["i", "VI", "VII", "v"],
+  "bars_per_chord": 2,
+  "parts": {
+    "kick":  {"type": "drums", "channel": "Kick",    "lanes": {"60": "X...X...X...X..."}},
+    "clap":  {"type": "drums", "channel": "Snare",   "lanes": {"60": "....x.......x..."}},
+    "hats":  {"type": "drums", "channel": "Hi-Hats", "lanes": {"60": "..x...x...x...xo"}, "humanize": 0.3},
+    "bass":  {"type": "bass",  "channel": "Bass 1",  "octave": 2, "rhythm": "..x...x...x...x."},
+    "stabs": {"type": "chords", "channel": "Synth 1", "octave": 4, "rhythm": "...x..x....x..x.", "velocity": 0.8},
+    "pad":   {"type": "chords", "channel": "Pad", "octave": 3, "velocity": 0.6},
+    "arp":   {"type": "arp", "channel": "Synth 2", "rate": 16, "pattern": "up", "span": 1, "gate": 0.5, "velocity": 0.6}
+  },
+  "arrangement": [
+    {"name": "intro",     "bars": 8,  "parts": ["kick", "hats"]},
+    {"name": "groove",    "bars": 8,  "parts": ["kick", "clap", "hats", "bass"]},
+    {"name": "breakdown", "bars": 8,  "parts": ["pad", "arp"]},
+    {"name": "drop",      "bars": 16, "parts": ["kick", "clap", "hats", "bass", "stabs", "arp"]},
+    {"name": "outro",     "bars": 8,  "parts": ["kick", "hats"]}
+  ]
+}
