@@ -177,19 +177,22 @@ class Handler(BaseHTTPRequestHandler):
             html = Path(__file__).with_name('studio.html').read_bytes()
             return self._send(200, html, 'text/html; charset=utf-8')
         if path == '/api/state':
-            from .fl import FLNotFound, find_fl_exe
-            import shutil
+            from .fl import FLNotFound, find_fl_exe, ffmpeg
             try:
                 fl = str(find_fl_exe())
             except FLNotFound:
                 fl = ''
+            try:
+                has_ffmpeg = bool(ffmpeg())
+            except FileNotFoundError:
+                has_ffmpeg = False
             mine = own_key(cfg)
             hosted = None if mine else hosted_info(cfg, fresh='fresh' in (urlparse(self.path).query or ''))
             has_ai = mine or bool(hosted and hosted.get('reachable'))
             return self._send(200, {'version': __version__, 'ai': has_ai, 'fl': fl,
                                     'mode': 'own' if mine else 'hosted', 'hosted': hosted,
                                     'license_set': bool(cfg.get('license')),
-                                    'ffmpeg': bool(shutil.which('ffmpeg')), 'out_dir': str(out_dir(cfg)),
+                                    'ffmpeg': has_ffmpeg, 'out_dir': str(out_dir(cfg)),
                                     'busy': JOBS.busy, 'songs': list_songs(out_dir(cfg))})
         if path.startswith('/api/job/'):
             job = JOBS.jobs.get(path.rsplit('/', 1)[-1])
@@ -250,6 +253,15 @@ class Handler(BaseHTTPRequestHandler):
                 ai = make_ai(cfg)
                 jid = JOBS.start(lambda step: change(out_dir(cfg) / song, instr, ai=ai, step=step))
                 return self._send(200, {'job': jid})
+            if path == '/api/install-ffmpeg':
+                from .fl import install_ffmpeg
+                jid = JOBS.start(lambda step: (step('installing audio tools (ffmpeg), about a minute'),
+                                               {'title': 'audio tools', 'seconds': 0, 'path': install_ffmpeg()})[1])
+                return self._send(200, {'job': jid})
+            if path == '/api/quit':
+                self._send(200, {'ok': True})
+                threading.Thread(target=self.server.shutdown, daemon=True).start()
+                return
             if path == '/api/portal':
                 from .remote import Hosted
                 url = Hosted(cfg['device'], cfg.get('license', ''), cfg.get('server', '')).portal()
@@ -274,8 +286,13 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main(port: int = 47390, open_browser: bool = True) -> None:
-    srv = ThreadingHTTPServer(('127.0.0.1', port), Handler)
     url = f'http://127.0.0.1:{port}/'
+    try:
+        srv = ThreadingHTTPServer(('127.0.0.1', port), Handler)
+    except OSError:  # already running: just show it
+        if open_browser:
+            webbrowser.open(url)
+        return
     print(f'P5 MIDI Studio running at {url}  (Ctrl+C to stop)')
     if open_browser:
         threading.Timer(0.6, lambda: webbrowser.open(url)).start()

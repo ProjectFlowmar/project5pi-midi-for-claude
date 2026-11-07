@@ -77,7 +77,7 @@ dialog small{font-weight:400;color:var(--muted)}
 </head>
 <body>
 <header><div class="hrow"><span class="logo">Project5pi</span><span class="app">MIDI Studio</span><span class="spacer"></span>
-  <span class="mono" id="ver" style="font-size:12px;color:#8C948F"></span><button class="btn ghost" id="openSettings">Settings</button></div></header>
+  <span class="mono" id="ver" style="font-size:12px;color:#8C948F"></span><button class="btn ghost" id="openSettings">Settings</button><button class="btn ghost" id="quit" title="Stop the Studio">Quit</button></div></header>
 <main>
   <div class="banner" id="setup" hidden></div>
   <div class="plan" id="plan" hidden></div>
@@ -123,8 +123,9 @@ EX.forEach(e=>{const b=document.createElement('button');b.className='chip';b.tex
 function setup(){const m=[];
   if(!state.ai)m.push(state.mode==='hosted'?'<li><b>The Project5pi service is not reachable right now.</b> Check your internet, or add your own AI key in Settings.</li>':'<li><b>Add an AI key</b> in Settings.</li>');
   if(!state.fl)m.push('<li><b>FL Studio not found.</b> Install FL Studio 20.7 or newer. Without it you still get the project and MIDI files, but no audio.</li>');
-  if(!state.ffmpeg)m.push('<li><b>ffmpeg not found.</b> Needed for mastering and the mix check. Install with <span class="mono">winget install ffmpeg</span>.</li>');
+  if(!state.ffmpeg)m.push('<li><b>Audio tools (ffmpeg) are missing.</b> They are needed for mastering and the mix check. <button class="btn line" id="getFfmpeg" style="min-height:34px;padding:6px 12px;margin-left:6px">Install them for me</button></li>');
   $('#setup').hidden=!m.length;$('#setup').innerHTML='<b>Before your first song:</b><ul>'+m.join('')+'</ul>';
+  if($('#getFfmpeg'))$('#getFfmpeg').onclick=()=>run('/api/install-ffmpeg',{});
   $('#make').disabled=!state.ai||state.busy;
   const P=$('#plan');P.hidden=false;
   if(state.mode==='own'){P.innerHTML='<span class="sub">Using your own AI key. No limits.</span>';return}
@@ -186,6 +187,7 @@ $('#openSettings').onclick=()=>{$('#outDir').value=state?state.out_dir:'';$('#se
 $('#closeSettings').onclick=()=>$('#settings').close();
 $('#saveSettings').onclick=async()=>{const b={out_dir:$('#outDir').value,ai_url:$('#aiUrl').value,ai_model:$('#aiModel').value};if($('#aiKey').value.trim())b.ai_key=$('#aiKey').value.trim();if($('#lic').value.trim())b.license=$('#lic').value.trim();
   try{await api('/api/settings',b);$('#aiKey').value='';$('#lic').value='';$('#settings').close();await load(true)}catch(e){alertMsg(e)}};
+$('#quit').onclick=async()=>{try{await api('/api/quit',{})}catch(e){}document.body.innerHTML='<main><div class="card"><h1>Studio stopped.</h1><p class="sub">You can close this tab. Open P5 MIDI Studio from the Start menu to use it again.</p></div></main>'};
 load();
 </script>
 </body>

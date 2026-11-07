@@ -10,3 +10,7 @@ out/
 *.mid
 *.mp3
 !docs/demo/*.mp3
+build/
+dist/
+packaging/p5midi.ico
+packaging/p5midi.png

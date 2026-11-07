@@ -137,9 +137,27 @@ def render(flp: str | Path, fmt: str = 'wav', timeout: int = 600) -> Path:
     return out
 
 
-def ffmpeg() -> str:
+def ffmpeg() -> str | None:
     exe = os.environ.get('FFMPEG') or shutil.which('ffmpeg')
+    if not exe and sys.platform == 'win32':  # installed by winget after this process started (PATH is stale)
+        local = Path(os.environ.get('LOCALAPPDATA', '')) / 'Microsoft' / 'WinGet'
+        cands = [local / 'Links' / 'ffmpeg.exe'] + sorted((local / 'Packages').glob('Gyan.FFmpeg*/*/bin/ffmpeg.exe'))
+        exe = next((str(c) for c in cands if c.is_file()), None)
     if not exe:
         raise FileNotFoundError('ffmpeg not found on PATH (needed for analyze/master). '
                                 'Install it from https://ffmpeg.org or `winget install ffmpeg`')
     return exe
+
+
+def install_ffmpeg(timeout: int = 900) -> str:
+    """Install a small ffmpeg build with winget (Windows 10/11), no admin rights needed."""
+    if sys.platform != 'win32':
+        raise RuntimeError('Install ffmpeg with your package manager (brew install ffmpeg / apt install ffmpeg).')
+    winget = shutil.which('winget') or str(Path(os.environ.get('LOCALAPPDATA', '')) / 'Microsoft' / 'WindowsApps' / 'winget.exe')
+    p = subprocess.run([winget, 'install', '--id', 'Gyan.FFmpeg.Essentials', '-e', '--scope', 'user', '--silent',
+                        '--accept-package-agreements', '--accept-source-agreements'], capture_output=True, text=True,
+                       timeout=timeout, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+    try:
+        return ffmpeg()
+    except FileNotFoundError:
+        raise RuntimeError('Could not install ffmpeg automatically: ' + (p.stdout + p.stderr)[-300:].strip()) from None
