@@ -155,18 +155,20 @@ function render(){const box=$('#songs');
       ${v.mp3?`<audio controls preload="none" src="/files/${encodeURIComponent(s.id)}/${encodeURIComponent(v.name)}.mp3"></audio>`:'<p class="sub" style="margin:12px 0">No audio (FL Studio not found). The project and MIDI files are in the folder.</p>'}
       <p class="sub mono" style="font-size:12.5px">${v.bpm?esc(v.bpm)+' BPM':''}${v.seconds?' · '+Math.round(v.seconds)+' s':''}${v.lufs!=null?' · '+v.lufs+' LUFS':''}${v.parts.length?' · '+esc(v.parts.join(', ')):''}</p>
       <div class="grid2"><div>${meter(v.sections)}</div><div>${notes}</div></div>
-      <div class="actions"><button class="btn fill" data-open="flp">Open in FL Studio</button><button class="btn line" data-open="folder">Show files</button></div>
+      <div class="actions"><button class="btn fill" data-open="flp">Open in FL Studio</button><button class="btn line" data-open="folder">Show files</button>${v.stems?'<button class="btn line" data-open="stems">Show stems</button>':(stemsOk()?'<button class="btn line" data-stems>Export stems</button>':'<button class="btn line" data-stems title="Part of Unlimited">Export stems (Unlimited)</button>')}</div>
       <div class="lbl" style="margin-top:16px">Change it</div>
       <div class="chips">${CHANGES.map(c=>`<button class="chip" data-change="${esc(c)}">${esc(c)}</button>`).join('')}</div>
       <div class="change"><input placeholder="Or say what to change, e.g. add a guitar-like lead in the hook" data-custom><button class="btn line" data-go>Change</button></div>
     </article>`}).join('');
   box.querySelectorAll('.song').forEach(el=>{const id=el.dataset.id;
     el.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{sel[id]=b.dataset.v;render()});
-    el.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>api('/api/open',{song:id,name:b.dataset.open==='flp'?sel[id]:''}).catch(e=>alertMsg(e)));
+    el.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>api('/api/open',{song:id,name:b.dataset.open==='folder'?'':sel[id],what:b.dataset.open}).catch(e=>alertMsg(e)));
+    el.querySelectorAll('[data-stems]').forEach(b=>b.onclick=()=>run('/api/stems',{song:id,name:sel[id]}));
     el.querySelectorAll('[data-change]').forEach(b=>b.onclick=()=>run('/api/change',{song:id,instruction:b.dataset.change}));
     el.querySelector('[data-go]').onclick=()=>{const t=el.querySelector('[data-custom]').value.trim();if(t)run('/api/change',{song:id,instruction:t})};
   })}
 
+function stemsOk(){return state.mode==='own'||((state.hosted||{}).status||{}).plan==='paid'}
 function alertMsg(e){$('#job').hidden=false;$('#jobErr').hidden=false;$('#jobErr').textContent=e.message||e}
 
 async function load(fresh){state=await api('/api/state'+(fresh?'?fresh=1':''));$('#ver').textContent='v'+state.version;setup();render()}

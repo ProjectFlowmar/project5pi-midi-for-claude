@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "project5pi-midi-for-claude"
-version = "0.1.0"
+version = "0.1.1"
 description = "Let Claude (or any AI) write, render and check real FL Studio songs from a JSON spec."
 readme = "README.md"
 license = "MIT"

@@ -74,7 +74,8 @@ p5midi studio          # opens http://127.0.0.1:47390 in your browser
 Describe the song and click **Make it**. About 40 seconds later you have the FL Studio
 project, MP3 and MIDI. If the mix check finds a problem, the AI fixes it and renders
 again before you hear it. Then use **More energy / Darker / Simpler drums...** or type
-any change; every version is kept. **Open in FL Studio** opens the project.
+any change; every version is kept. **Open in FL Studio** opens the project, and
+**Export stems** writes one aligned WAV per instrument for mixing anywhere.
 
 The Studio writes songs with any OpenAI-compatible model. Paste a DeepSeek key in
 Settings (about half a cent per song with `deepseek-v4-flash`), or point it at OpenAI,
@@ -152,6 +153,7 @@ Full reference: [SPEC.md](src/p5midi/SPEC.md).
 | `p5midi create "idea"` | AI writes the spec, then make + one automatic mix fix |
 | `p5midi change <folder> "darker"` | AI revises the latest version, keeps the old one |
 | `p5midi studio` | the local app |
+| `p5midi stems song.flp` | one WAV per part, all the same length and aligned, for any DAW |
 
 ## What it checks for you
 

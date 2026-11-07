@@ -131,6 +131,7 @@ def list_songs(root: Path) -> list[dict]:
                 continue
             a = rep.get('analysis') or {}
             versions.append({'name': name, 'mp3': (d / f'{name}.mp3').exists(), 'bpm': rep.get('bpm'),
+                             'stems': (d / f'{name}-stems').is_dir(),
                              'seconds': a.get('duration_s'), 'lufs': a.get('lufs'), 'notes': a.get('notes', []),
                              'sections': [[s['name'], s['lufs']] for s in a.get('sections', [])],
                              'parts': list((rep.get('parts') or {}).keys())})
@@ -253,6 +254,18 @@ class Handler(BaseHTTPRequestHandler):
                 ai = make_ai(cfg)
                 jid = JOBS.start(lambda step: change(out_dir(cfg) / song, instr, ai=ai, step=step))
                 return self._send(200, {'job': jid})
+            if path == '/api/stems':
+                from .stems import export_stems
+                song, name = str(body.get('song', '')), str(body.get('name', ''))
+                if not SAFE.match(song) or not SAFE.match(name):
+                    return self._send(400, {'error': 'bad name'})
+                if not own_key(cfg) and (hosted_info(cfg).get('status') or {}).get('plan') != 'paid':
+                    return self._send(402, {'error': 'Stems are part of Unlimited. Upgrade to export them.'})
+                flp = out_dir(cfg) / song / f'{name}.flp'
+                if not flp.is_file():
+                    return self._send(404, {'error': 'missing project'})
+                jid = JOBS.start(lambda step: {**export_stems(flp, step=step), 'title': f'stems for {name}'})
+                return self._send(200, {'job': jid})
             if path == '/api/install-ffmpeg':
                 from .fl import install_ffmpeg
                 jid = JOBS.start(lambda step: (step('installing audio tools (ffmpeg), about a minute'),
@@ -271,7 +284,8 @@ class Handler(BaseHTTPRequestHandler):
                 song, name = str(body.get('song', '')), str(body.get('name', ''))
                 if not SAFE.match(song) or (name and not SAFE.match(name)):
                     return self._send(400, {'error': 'bad name'})
-                target = out_dir(cfg) / song / (f'{name}.flp' if name else '')
+                what = str(body.get('what', ''))
+                target = out_dir(cfg) / song / ((f'{name}-stems' if what == 'stems' else f'{name}.flp') if name else '')
                 if not target.exists():
                     return self._send(404, {'error': 'missing'})
                 if sys.platform == 'win32':

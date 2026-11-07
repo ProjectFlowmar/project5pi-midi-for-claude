@@ -11,6 +11,7 @@
   p5midi create "idea" [--seconds 120]  AI writes the song, then make + automatic mix fix
   p5midi change <song folder> "darker"  AI revises the latest version
   p5midi studio                         local app: idea box, player, Open in FL Studio
+  p5midi stems song.flp                 one WAV per part, same length, for any DAW
 """
 from __future__ import annotations
 
@@ -84,6 +85,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument('--no-fix', action='store_true'); p.add_argument('--no-render', action='store_true')
     p = sub.add_parser('change', help='AI revises the latest version of a song')
     p.add_argument('folder'); p.add_argument('instruction'); p.add_argument('--no-render', action='store_true')
+    p = sub.add_parser('stems', help='render one WAV per part (same length, aligned)')
+    p.add_argument('flp'); p.add_argument('-o', '--out')
     p = sub.add_parser('studio', help='open the local Studio app in your browser')
     p.add_argument('--port', type=int, default=47390); p.add_argument('--no-browser', action='store_true')
 
@@ -126,6 +129,9 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 r = app.change(a.folder, a.instruction, render=not a.no_render, step=say)
             _print({k: r[k] for k in r if k != 'report'} | {'notes': (r['report'].get('analysis') or {}).get('notes')})
+        elif a.cmd == 'stems':
+            from .stems import export_stems
+            _print(export_stems(a.flp, a.out, step=lambda m: print(f'... {m}', file=sys.stderr)))
         elif a.cmd == 'studio':
             from .studio import main as studio_main
             studio_main(a.port, not a.no_browser)
