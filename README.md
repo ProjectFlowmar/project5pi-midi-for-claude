@@ -153,7 +153,7 @@ Full reference: [SPEC.md](src/p5midi/SPEC.md).
 | `p5midi create "idea"` | AI writes the spec, then make + one automatic mix fix |
 | `p5midi change <folder> "darker"` | AI revises the latest version, keeps the old one |
 | `p5midi studio` | the local app |
-| `p5midi film --srt captions.srt --video v.mp4 --preview` | an original underscore timed to the narration: AI cue sheet (moods, hits), composed and rendered in FL Studio, ducked under the video's audio |
+| `p5midi film --video v.mp4 [--srt captions.srt] --brief "..." --preview` | music for a video. 3 minutes and longer: an original underscore timed to the narration (AI cue sheet, composed and rendered in FL Studio). Shorter: a fitting free-license track (Mixkit), trimmed or looped to length, license logged. `--score` always composes |
 | `p5midi stems song.flp` | one WAV per part, all the same length and aligned, for any DAW |
 
 ## What it checks for you

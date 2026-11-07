@@ -414,3 +414,28 @@ def mix_preview(video: str | Path, score_wav: str | Path, out: str | Path, music
     _run(['-y', '-i', str(video), '-i', str(score_wav), '-filter_complex', fc, '-map', '0:v', '-map', '[a]',
           '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', str(out)])
     return Path(out)
+
+
+SHORT_VIDEO = float(os.environ.get('P5MIDI_SHORT_VIDEO', '180'))
+
+
+def soundtrack(duration: float, out_dir: str | Path, lines: list[dict] | None = None, regions: list[dict] | None = None,
+               title: str = 'Film', brief: str = '', force_score: bool = False, threshold: float = SHORT_VIDEO,
+               render: bool = True, step=lambda s: None) -> dict:
+    """Omar 11/7: videos shorter than 3 minutes get free-license music; 3 minutes and longer get an FL Studio score."""
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    if duration < threshold and not force_score:
+        from . import library
+        step(f'{duration:.0f} s video: picking a free-license track')
+        text = ' '.join(ln['text'] for ln in (lines or []) if not ln['text'].startswith('[shot'))[:600]
+        t = library.pick_track(f'{brief} {title} {text}'.strip(), duration)
+        mp3 = library.fetch(t, used_for=title)
+        wav = library.fit(mp3, duration, out / 'score.wav')
+        info = {'mode': 'free-license', 'folder': str(out.resolve()), 'wav': str(wav),
+                'track': {k: t[k] for k in ('id', 'name', 'artist', 'genre', 'seconds', 'why')},
+                'license': f'Mixkit Stock Music Free License {library.LICENSE_URL}'}
+        (out / 'music.json').write_text(json.dumps(info, indent=1), encoding='utf-8')
+        return info
+    r = score_film(lines or [], regions or [], duration, out, title, render=render, step=step, brief=brief)
+    return {'mode': 'fl-studio-score', **r}

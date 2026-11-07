@@ -91,6 +91,8 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser('film', help='score a video: timed underscore from captions (+ optional preview mix)')
     p.add_argument('--srt', help='narration captions with times (without it, the scene cuts of the video are used)')
     p.add_argument('--brief', default='', help='one line on the feel, e.g. "uplifting product promo"')
+    p.add_argument('--score', action='store_true', help='always compose an FL Studio score (default: only for 3 minutes and longer)')
+    p.add_argument('--threshold', type=float, default=180.0, help='seconds; shorter videos get free-license music')
     p.add_argument('--video', help='the video (for its length and an optional preview mix)')
     p.add_argument('--duration', type=float, help='length in seconds if no --video')
     p.add_argument('--scenes', help='JSON with "scenes" [{start,end,type}] (docv2 props) for intro/title/act/sponsor/end')
@@ -156,16 +158,17 @@ def main(argv: list[str] | None = None) -> int:
                 regions += json.loads(Path(a.regions).read_text(encoding='utf-8'))
             if a.srt:
                 lines = film.read_srt(a.srt)
-            elif a.video:
+            elif a.video and (a.score or dur >= a.threshold):
                 lines = film.cut_lines(film.scene_cuts(a.video), dur)
             else:
-                raise ValueError('give --srt (narration captions) or --video (scene cuts are used)')
-            r = film.score_film(lines, regions, dur, a.out, a.title, render=not a.no_render, brief=a.brief,
-                                step=lambda m: print(f'... {m}', file=sys.stderr))
+                lines = []
+            r = film.soundtrack(dur, a.out, lines, regions, a.title, a.brief, force_score=a.score, threshold=a.threshold,
+                                render=not a.no_render, step=lambda m: print(f'... {m}', file=sys.stderr))
             if a.preview and a.video and r.get('wav'):
                 r['preview'] = str(film.mix_preview(a.video, r['wav'], Path(a.out) / 'preview.mp4'))
-            r['cue_sheet'] = {'key': r['cue_sheet']['key'], 'source': r['cue_sheet']['source'],
-                              'cues': len(r['cue_sheet']['cues']), 'hits': r['cue_sheet']['hits']}
+            if 'cue_sheet' in r:
+                r['cue_sheet'] = {'key': r['cue_sheet']['key'], 'source': r['cue_sheet']['source'],
+                                  'cues': len(r['cue_sheet']['cues']), 'hits': r['cue_sheet']['hits']}
             _print(r)
         elif a.cmd == 'studio':
             from .studio import main as studio_main
