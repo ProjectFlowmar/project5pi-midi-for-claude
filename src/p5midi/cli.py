@@ -84,6 +84,8 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser('create', help='idea -> song (needs an AI key, e.g. DEEPSEEK_API_KEY)')
     p.add_argument('idea'); p.add_argument('-o', '--out', default='songs'); p.add_argument('--seconds', type=float)
     p.add_argument('--no-fix', action='store_true'); p.add_argument('--no-render', action='store_true')
+    p.add_argument('--pack', help='genre pack id (see: p5midi packs)')
+    p.add_argument('--versions', type=int, default=1, help='make 1 to 3 different takes on the idea')
     p = sub.add_parser('change', help='AI revises the latest version of a song')
     p.add_argument('folder'); p.add_argument('instruction'); p.add_argument('--no-render', action='store_true')
     p = sub.add_parser('stems', help='render one WAV per part (same length, aligned)')
@@ -101,6 +103,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument('--title', default='Film score'); p.add_argument('-o', '--out', default='score')
     p.add_argument('--no-render', action='store_true'); p.add_argument('--preview', action='store_true',
                    help='also write <out>/preview.mp4: the video with the score ducked under its audio')
+    p = sub.add_parser('packs', help='list the genre packs')
     p = sub.add_parser('styles', help='list the composer/producer influence database')
     p.add_argument('id', nargs='?', help='show one style in full')
     p = sub.add_parser('studio', help='open the local Studio app in your browser')
@@ -141,7 +144,8 @@ def main(argv: list[str] | None = None) -> int:
             from . import app
             say = lambda m: print(f'... {m}', file=sys.stderr)
             if a.cmd == 'create':
-                r = app.create(a.idea, a.out, max_seconds=a.seconds, fix=not a.no_fix, render=not a.no_render, step=say)
+                r = app.create(a.idea, a.out, max_seconds=a.seconds, fix=not a.no_fix, render=not a.no_render, step=say,
+                               pack=a.pack, versions=a.versions)
             else:
                 r = app.change(a.folder, a.instruction, render=not a.no_render, step=say)
             _print({k: r[k] for k in r if k != 'report'} | {'notes': (r['report'].get('analysis') or {}).get('notes')})
@@ -173,6 +177,9 @@ def main(argv: list[str] | None = None) -> int:
                 r['cue_sheet'] = {'key': r['cue_sheet']['key'], 'source': r['cue_sheet']['source'],
                                   'cues': len(r['cue_sheet']['cues']), 'hits': r['cue_sheet']['hits']}
             _print(r)
+        elif a.cmd == 'packs':
+            from . import packs as _packs
+            _print(_packs.menu())
         elif a.cmd == 'styles':
             from . import styles as _styles
             _print(_styles.get(a.id) if a.id else _styles.menu())

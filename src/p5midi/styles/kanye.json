@@ -1,0 +1,38 @@
+{
+ "id": "kanye",
+ "name": "Kanye West",
+ "kind": "beat",
+ "known_for": "Roc-A-Fella soul-chop era (The Blueprint, The College Dropout, Late Registration), then 808s & Heartbreak and My Beautiful Dark Twisted Fantasy; made the sped-up 'chipmunk soul' sample the sound of the 2000s.",
+ "techniques": [
+  "Chops a soul or gospel record on an MPC grid and re-plays the chops in a new order instead of looping the record as-is.",
+  "Speeds the vocal sample up (pitch rises with it, often several semitones) so the voice becomes a bright, emotional hook: the 'chipmunk soul' sound.",
+  "Lets the MPC timing stay loose: off-beat kicks land slightly late for a lazy, human groove.",
+  "Big, hard drums under the soft sample: punchy kick, crisp snare layered with handclaps, sometimes a real drum break sampled under programmed hits.",
+  "Uses the human voice as the main instrument; later records add choirs, strings and horns for a cinematic build.",
+  "Filters the sample for the intro ('through the wall'), then opens it up when the drums drop; stutters a chop into the hook.",
+  "In the 808s era: Roland TR-808 drums, sparse minor chords, long booming 808s and vocal processing as texture."
+ ],
+ "params": {
+  "bpm": [84, 96],
+  "mode": "minor",
+  "harmony": "Two-chord soul loop taken from the sample (often a minor chord and the chord a step below), bass doubling the sample's roots.",
+  "progressions": ["i bVII", "i bVII bVI bVII", "i iv"],
+  "ostinato": "none",
+  "pulse": true,
+  "drone": false,
+  "arp_rate": 0,
+  "layers": {"strings": 0.4, "piano": 0.3, "choir": 0.6, "glass": 0.0, "pluck": 0.0, "sub": 0.6, "brass": 0.4, "synth_pad": 0.2},
+  "chord_every_seconds": 2.7,
+  "hits_per_minute": 110,
+  "dynamics": "steady",
+  "drums": "Boom-bap: kick with late off-beat hits, snare plus clap on 2 and 4, swung 16th hats (about 54 to 58 percent), optional sampled break under it; hits_per_minute counts kick+snare events."
+ },
+ "sources": [
+  "https://reverbmachine.com/blog/deconstructing-kanye-west-good-morning/",
+  "https://reverbmachine.com/blog/dissecting-kanye-wests-good-life/",
+  "https://flypaper.soundfly.com/produce/the-musical-and-sociopolitical-evolution-of-kanyes-use-of-soul-music-samples/",
+  "https://musictech.com/guides/essential-guide/7-iconic-producers-who-changed-sampling/",
+  "https://medium.com/micro-chop/kanye-west-sampled-dr-dres-xxplosive-drums-for-jay-z-s-this-can-t-be-life-e4f43606ae60"
+ ],
+ "notes": "No first-hand Kanye interview on technique was found in this pass; sources are track breakdowns (Reverb Machine), Soundfly and MusicTech overviews. The 'late off-beat kick' point is from the Good Morning breakdown. bpm, swing and hit counts are inferences. Medium-weak sourcing. Copyrighted records are never sampled here: P5 MIDI chops public-domain recordings (US, published before 1926) or royalty-free packs."
+}

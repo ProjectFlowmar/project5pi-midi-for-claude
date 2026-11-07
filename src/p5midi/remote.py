@@ -63,9 +63,11 @@ class Hosted:
         spec['hosted_song'] = song
         return enforce_length(spec, max_seconds), usage
 
-    def compose(self, idea: str, max_seconds: float | None = None) -> tuple[dict, dict]:
+    def compose(self, idea: str, max_seconds: float | None = None, pack: str | None = None,
+                variant: int = 0) -> tuple[dict, dict]:
         cat = template_catalog()
-        r = self._call('/v1/compose', {'idea': idea, 'seconds': max_seconds, 'catalog': cat})
+        r = self._call('/v1/compose', {'idea': idea, 'seconds': max_seconds, 'catalog': cat,
+                                       'pack': pack, 'variant': variant})
         return self._checked(r, cat, max_seconds)
 
     def revise(self, spec: dict, instruction: str, max_seconds: float | None = None,

@@ -15,11 +15,11 @@ from typing import Callable
 from .compose import AI, compose, revise
 
 
-def _compose(idea, ai, max_seconds):
+def _compose(idea, ai, max_seconds, pack=None, variant=0):
     from .remote import Hosted
     if isinstance(ai, Hosted):
-        return ai.compose(idea, max_seconds)
-    return compose(idea, ai=ai, max_seconds=max_seconds)
+        return ai.compose(idea, max_seconds, pack=pack, variant=variant)
+    return compose(idea, ai=ai, max_seconds=max_seconds, pack=pack, variant=variant)
 
 
 def _revise(spec, instruction, ai, max_seconds, notes=None, autofix=False):
@@ -51,13 +51,36 @@ def _notes(rep: dict) -> list[str]:
 
 
 def create(idea: str, out_dir: str | Path = 'songs', ai: AI | None = None, max_seconds: float | None = None,
-           fix: bool = True, render: bool = True, step: Step = lambda s: None) -> dict:
+           fix: bool = True, render: bool = True, step: Step = lambda s: None, pack: str | None = None,
+           versions: int = 1) -> dict:
+    """Make a song from an idea. versions 2-3: also make different takes on the same idea, each in its
+    own folder; the result is the first take plus a "takes" list."""
+    from .packs import MAX_VERSIONS
+    versions = max(1, min(int(versions or 1), MAX_VERSIONS))
+    if versions > 1:
+        t0 = time.time()
+        takes = []
+        for v in range(versions):
+            say = lambda msg, v=v: step(f'take {v + 1} of {versions}: {msg}')
+            takes.append(_create_one(idea, out_dir, ai, max_seconds, fix, render, say, pack, v))
+        first = dict(takes[0])
+        first['takes'] = [{k: t[k] for k in ('folder', 'name', 'title')} for t in takes]
+        first['seconds'] = round(time.time() - t0, 1)
+        return first
+    return _create_one(idea, out_dir, ai, max_seconds, fix, render, step, pack, 0)
+
+
+def _create_one(idea, out_dir, ai, max_seconds, fix, render, step, pack, variant) -> dict:
     t0 = time.time()
     step('writing the song')
-    spec, usage = _compose(idea, ai, max_seconds)
+    spec, usage = _compose(idea, ai, max_seconds, pack, variant)
     folder = Path(out_dir) / f"{time.strftime('%Y%m%d-%H%M%S')}-{_slug(spec.get('title') or idea)}"
+    if variant:
+        folder = folder.with_name(folder.name + f'-take{variant + 1}')
     folder.mkdir(parents=True, exist_ok=True)
     (folder / 'idea.txt').write_text(idea, encoding='utf-8')
+    if pack:
+        (folder / 'pack.txt').write_text(pack, encoding='utf-8')
     name = _slug(spec.get('title') or 'song')
     rep = _make(spec, folder, name, step, render)
     history = [{'step': 'compose', 'notes': _notes(rep)}]

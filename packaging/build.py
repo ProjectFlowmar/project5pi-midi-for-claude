@@ -17,7 +17,8 @@ from p5midi import __version__  # noqa: E402
 PKG = ROOT / 'packaging'
 subprocess.run([sys.executable, str(PKG / 'make_icon.py')], check=True)
 work = ROOT / 'build' / 'pyi'
-data = [(ROOT / 'src' / 'p5midi' / 'studio.html', 'p5midi'), (ROOT / 'src' / 'p5midi' / 'SPEC.md', 'p5midi')]
+data = [(ROOT / 'src' / 'p5midi' / 'studio.html', 'p5midi'), (ROOT / 'src' / 'p5midi' / 'SPEC.md', 'p5midi'),
+        (ROOT / 'src' / 'p5midi' / 'styles', 'p5midi/styles'), (ROOT / 'src' / 'p5midi' / 'packs', 'p5midi/packs')]
 subprocess.run([sys.executable, '-m', 'PyInstaller', '--noconfirm', '--clean', '--windowed', '--onedir',
                 '--name', 'P5 MIDI Studio', '--icon', str(PKG / 'p5midi.ico'),
                 '--paths', str(ROOT / 'src'), '--collect-submodules', 'p5midi',

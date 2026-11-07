@@ -17,7 +17,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
-from . import __version__
+from . import __version__, packs
 
 
 def config_path() -> Path:
@@ -194,7 +194,8 @@ class Handler(BaseHTTPRequestHandler):
                                     'mode': 'own' if mine else 'hosted', 'hosted': hosted,
                                     'license_set': bool(cfg.get('license')),
                                     'ffmpeg': has_ffmpeg, 'out_dir': str(out_dir(cfg)),
-                                    'busy': JOBS.busy, 'songs': list_songs(out_dir(cfg))})
+                                    'busy': JOBS.busy, 'songs': list_songs(out_dir(cfg)),
+                                    'packs': packs.menu(), 'max_versions': packs.MAX_VERSIONS})
         if path.startswith('/api/job/'):
             job = JOBS.jobs.get(path.rsplit('/', 1)[-1])
             return self._send(200, job) if job else self._send(404, {'error': 'no job'})
@@ -238,10 +239,18 @@ class Handler(BaseHTTPRequestHandler):
                 if len(idea) < 3:
                     return self._send(400, {'error': 'Describe the song first.'})
                 secs = float(body['seconds']) if body.get('seconds') else None
+                pack = str(body.get('pack') or '') or None
+                if pack and pack not in packs.all_packs():
+                    return self._send(400, {'error': 'Unknown genre pack.'})
+                try:
+                    versions = max(1, min(int(body.get('versions') or 1), packs.MAX_VERSIONS))
+                except (TypeError, ValueError):
+                    versions = 1
                 ai = make_ai(cfg)
                 def job(step):
                     try:
-                        return create(idea, out_dir(cfg), ai=ai, max_seconds=secs, step=step)
+                        return create(idea, out_dir(cfg), ai=ai, max_seconds=secs, step=step, pack=pack,
+                                      versions=versions)
                     finally:
                         _HOSTED['data'] = None  # songs-left changed
                 jid = JOBS.start(job)

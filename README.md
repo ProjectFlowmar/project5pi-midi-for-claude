@@ -87,8 +87,20 @@ p5midi create "Lo-fi study beat, 80 BPM, dusty piano, swung drums" --seconds 90
 p5midi change "songs/20261107-...-dusty-piano" "darker, slower"
 ```
 
-A hosted version that needs no key (free for 5 songs a month) is coming:
-[join the waitlist](https://project5pi.com/midi/?ref=github).
+Pick a **genre pack** (Boom Bap, Atlanta Trap, West Coast G-Funk, Drill, Neptunes Bounce,
+Timbaland Rhythm, Lo-fi Chill, Afrobeats, Reggaeton, R&B Slow Jam) to give the AI that genre's
+recipe: template, tempo range, drum patterns, harmony and arrangement rules, plus the producer
+techniques from the influence database. Ask for **2 or 3 versions** to get different takes on
+the same idea, each in its own folder:
+
+```bash
+p5midi packs
+p5midi create "Smooth cruise for a barbershop promo" --pack g-funk --versions 2 --seconds 60
+```
+
+The [Windows app](https://project5pi.com/midi/?ref=github) needs no key: free for 5 songs a
+month (Boom Bap and Atlanta Trap packs included); Unlimited adds every pack and several versions
+per idea. With your own key, everything here is free and open source.
 
 ## Use it from Claude
 
@@ -150,8 +162,9 @@ Full reference: [SPEC.md](src/p5midi/SPEC.md).
 | `p5midi master in.wav out.mp3 --lufs -10` | static gain + limiter to a loudness target, true peak under -1 dBFS |
 | `p5midi analyze song.mp3 [--spec song.json] [--reference ref.mp3]` | LUFS, true peak, six-band balance, stereo width, per-section loudness, plain-language problems |
 | `p5midi make song.json` | all of the above in one go |
-| `p5midi create "idea"` | AI writes the spec, then make + one automatic mix fix |
+| `p5midi create "idea" [--pack drill] [--versions 3]` | AI writes the spec, then make + one automatic mix fix |
 | `p5midi change <folder> "darker"` | AI revises the latest version, keeps the old one |
+| `p5midi packs` / `p5midi styles` | the genre packs, and the composer/producer influence database |
 | `p5midi studio` | the local app |
 | `p5midi film --video v.mp4 [--srt captions.srt] --brief "..." --preview` | music for a video. 3 minutes and longer: an original underscore timed to the narration (AI cue sheet, composed and rendered in FL Studio). Shorter: a fitting free-license track (Mixkit), trimmed or looped to length, license logged. `--score` always composes |
 | `p5midi stems song.flp` | one WAV per part, all the same length and aligned, for any DAW |

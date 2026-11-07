@@ -37,7 +37,7 @@ import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import __version__
+from . import __version__, packs
 from .compose import AI, ComposeError, catalog_check, compose, fix, revise
 
 FREE_SONGS, FREE_SONGS_IP, FREE_SECONDS, FREE_CHANGES = 5, 15, 60, 2
@@ -200,6 +200,22 @@ def handle_stripe_event(db: DB, ev: dict, mailer=None, stripe_call=stripe) -> st
     return 'ignored'
 
 
+def pack_and_variant(body: dict, plan: str) -> tuple[str | None, int]:
+    """Genre packs marked free and a single take are on the free plan; the rest is Unlimited."""
+    pack = str(body.get('pack') or '')[:40] or None
+    try:
+        variant = max(0, min(int(body.get('variant') or 0), packs.MAX_VERSIONS - 1))
+    except (TypeError, ValueError):
+        variant = 0
+    if pack:
+        p = packs.get(pack)  # KeyError -> 400
+        if plan != 'paid' and not p.get('free'):
+            raise PermissionError(f'The {p["name"]} genre pack is part of Unlimited. Upgrade to use every pack.')
+    if variant and plan != 'paid':
+        raise PermissionError('Several versions per idea is part of Unlimited.')
+    return pack, variant
+
+
 # ---------------------------------------------------------------- HTTP
 def clean_catalog(raw) -> dict:
     if not isinstance(raw, dict) or not raw:
@@ -228,7 +244,8 @@ class Service:
         return {'version': __version__, 'monthly': {'price': 5, 'url': env('P5H_LINK_MONTHLY')},
                 'yearly': {'price': 39, 'url': env('P5H_LINK_YEARLY'), 'founding_left': founding_left(self.db)},
                 'free': {'songs_per_month': FREE_SONGS, 'seconds': FREE_SECONDS, 'changes_per_song': FREE_CHANGES},
-                'selling': bool(env('P5H_LINK_MONTHLY') and env('P5H_LINK_YEARLY'))}
+                'selling': bool(env('P5H_LINK_MONTHLY') and env('P5H_LINK_YEARLY')),
+                'packs': packs.menu(), 'max_versions': packs.MAX_VERSIONS}
 
     def status(self, body, ip) -> dict:
         who, plan, lic = who_and_plan(self.db, body, ip)
@@ -246,11 +263,12 @@ class Service:
         if songs_left(self.db, who, plan, ip) <= 0:
             raise PermissionError('You have used your free songs this month. Upgrade for unlimited songs.'
                                   if plan == 'free' else 'Daily song limit reached. Try again tomorrow.')
+        pack, variant = pack_and_variant(body, plan)
         cat = clean_catalog(body.get('catalog'))
         cap = PAID_SECONDS if plan == 'paid' else FREE_SECONDS
         secs = min(float(body.get('seconds') or cap), cap)
         spec, usage = compose(str(body.get('idea', ''))[:2000], ai=self.ai_(), max_seconds=secs, catalog=cat,
-                              validate=catalog_check(cat))
+                              validate=catalog_check(cat), pack=pack, variant=variant)
         song = secrets.token_hex(8)
         self.db.q('INSERT INTO songs VALUES(?,?,0,?,0)', (song, who, int(time.time())))
         self.db.bump('daily', today(), '*', 'n')
@@ -414,6 +432,8 @@ def make_handler(svc: Service):
                 return self.send(402, {'error': str(e)})
             except (ValueError, ComposeError) as e:
                 return self.send(400, {'error': str(e)[:400]})
+            except KeyError as e:
+                return self.send(400, {'error': str(e).strip("'")[:400]})
             except Exception as e:
                 print('error', type(e).__name__, e, flush=True)
                 return self.send(500, {'error': 'Something went wrong. Please try again.'})

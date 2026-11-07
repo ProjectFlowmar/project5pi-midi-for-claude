@@ -88,6 +88,8 @@ dialog small{font-weight:400;color:var(--muted)}
     <textarea id="idea" placeholder="Dark trap, 140 BPM, A minor. Sliding 808, hat rolls, a pad and a short synth hook. Quiet intro, two hooks, a break."></textarea>
     <div class="chips" id="examples"></div>
     <div class="row">
+      <select id="pack" aria-label="Genre pack"><option value="">Any genre</option></select>
+      <select id="takes" aria-label="Versions"><option value="1">1 version</option><option value="2">2 versions</option><option value="3">3 versions</option></select>
       <select id="len" aria-label="Length"><option value="60">About 1 minute</option><option value="120" selected>About 2 minutes</option><option value="180">About 3 minutes</option><option value="">Let it decide</option></select>
       <button class="btn fill" id="make">Make it</button>
       <span class="sub" id="makeNote">Takes about a minute: writing, FL Studio export, mastering, mix check.</span>
@@ -120,7 +122,14 @@ async function api(path,body){const r=await fetch(path,body?{method:'POST',heade
 
 EX.forEach(e=>{const b=document.createElement('button');b.className='chip';b.textContent=e.split(',')[0];b.title=e;b.onclick=()=>{$('#idea').value=e;$('#idea').focus()};$('#examples').appendChild(b)});
 
-function setup(){const m=[];
+function packs(){const P=$('#pack');if(P.dataset.done||!state.packs)return;P.dataset.done=1;
+  state.packs.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;o.title=p.blurb;o.dataset.free=p.free?1:'';P.appendChild(o)});
+  P.onchange=()=>{const p=state.packs.find(x=>x.id===P.value);if(p&&!$('#idea').value.trim())$('#idea').value=p.example}}
+function gate(free){[...$('#pack').options].forEach(o=>{if(!o.value)return;const lock=free&&!o.dataset.free;o.disabled=lock;
+    o.textContent=o.textContent.replace(/ \(Unlimited\)$/,'')+(lock?' (Unlimited)':'')});
+  [...$('#takes').options].forEach(o=>{o.disabled=free&&o.value!=='1';o.textContent=o.textContent.replace(/ \(Unlimited\)$/,'')+(free&&o.value!=='1'?' (Unlimited)':'')});
+  if(free){if($('#pack').selectedOptions[0]&&$('#pack').selectedOptions[0].disabled)$('#pack').value='';$('#takes').value='1'}}
+function setup(){const m=[];packs();gate(false);
   if(!state.ai)m.push(state.mode==='hosted'?'<li><b>The Project5pi service is not reachable right now.</b> Check your internet, or add your own AI key in Settings.</li>':'<li><b>Add an AI key</b> in Settings.</li>');
   if(!state.fl)m.push('<li><b>FL Studio not found.</b> Install FL Studio 20.7 or newer. Without it you still get the project and MIDI files, but no audio.</li>');
   if(!state.ffmpeg)m.push('<li><b>Audio tools (ffmpeg) are missing.</b> They are needed for mastering and the mix check. <button class="btn line" id="getFfmpeg" style="min-height:34px;padding:6px 12px;margin-left:6px">Install them for me</button></li>');
@@ -139,7 +148,7 @@ function setup(){const m=[];
   if(state.license_set&&st.license&&!st.license.valid)html+='<span class="sub" style="color:var(--bad)">Your license is not active.</span>';
   html+='<button class="btn line" id="enterKey">Enter license key</button>';
   P.innerHTML=html;$('#enterKey').onclick=()=>$('#openSettings').click();
-  const free=st.plan!=='paid';[...$('#len').options].forEach(o=>{o.disabled=free&&(o.value===''||+o.value>60)});if(free)$('#len').value='60'}
+  const free=st.plan!=='paid';gate(free);[...$('#len').options].forEach(o=>{o.disabled=free&&(o.value===''||+o.value>60)});if(free)$('#len').value='60'}
 
 function meter(secs){if(!secs||!secs.length)return'';const v=secs.map(s=>s[1]).filter(x=>x!=null);const lo=Math.min(...v)-3,hi=Math.max(...v);
   return '<div class="lbl">Loudness by section</div><div class="meter">'+secs.map(([n,l])=>`<div><b>${esc(n)}</b><i style="width:${l==null?0:Math.max(6,Math.round((l-lo)/(hi-lo||1)*100))}%"></i><span class="mono">${l??'-'}</span></div>`).join('')+'</div>'}
@@ -180,11 +189,11 @@ async function run(path,body){$('#job').hidden=false;$('#jobErr').hidden=true;$(
 
 async function poll(id){for(;;){const j=await api('/api/job/'+id);
   $('#steps').innerHTML=j.steps.map((s,i)=>`<li><span class="t mono">${s.t}s</span>${i===j.steps.length-1&&j.status==='running'?'<span class="spin"></span>':'<span>✓</span>'}<span>${esc(s.text)}</span></li>`).join('');
-  if(j.status==='done'){const r=j.result;$('#steps').insertAdjacentHTML('beforeend',`<li><span class="t mono">${r.seconds}s</span><span class="ok">Ready: ${esc(r.title)}</span></li>`);return}
+  if(j.status==='done'){const r=j.result;$('#steps').insertAdjacentHTML('beforeend',`<li><span class="t mono">${r.seconds}s</span><span class="ok">Ready: ${r.takes?r.takes.map(t=>esc(t.title)).join(', '):esc(r.title)}</span></li>`);return}
   if(j.status==='error'){alertMsg(j.error);return}
   await new Promise(r=>setTimeout(r,1200))}}
 
-$('#make').onclick=()=>{const idea=$('#idea').value.trim();if(idea.length<3){$('#idea').focus();return}run('/api/create',{idea,seconds:$('#len').value})};
+$('#make').onclick=()=>{const idea=$('#idea').value.trim();if(idea.length<3){$('#idea').focus();return}run('/api/create',{idea,seconds:$('#len').value,pack:$('#pack').value,versions:+$('#takes').value})};
 $('#openSettings').onclick=()=>{$('#outDir').value=state?state.out_dir:'';$('#settings').showModal()};
 $('#closeSettings').onclick=()=>$('#settings').close();
 $('#saveSettings').onclick=async()=>{const b={out_dir:$('#outDir').value,ai_url:$('#aiUrl').value,ai_model:$('#aiModel').value};if($('#aiKey').value.trim())b.ai_key=$('#aiKey').value.trim();if($('#lic').value.trim())b.license=$('#lic').value.trim();

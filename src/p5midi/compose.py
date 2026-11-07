@@ -208,16 +208,24 @@ def _validated(ai: AI, messages: list[dict], max_seconds, tries: int = 3, valida
 
 
 def compose(idea: str, ai: AI | None = None, max_seconds: float | None = None,
-            catalog: dict | None = None, validate=None, style: str | None = None) -> tuple[dict, dict]:
-    """Returns (spec, token usage). style: an id from the influence database (p5midi styles)."""
+            catalog: dict | None = None, validate=None, style: str | None = None,
+            pack: str | None = None, variant: int = 0) -> tuple[dict, dict]:
+    """Returns (spec, token usage). style: an id from the influence database (p5midi styles);
+    pack: a genre pack id (p5midi packs); variant 1-2: write a different take on the same idea."""
+    from . import packs as _packs
     from . import styles as _styles
     ai = ai or AI.from_env()
     catalog = catalog or template_catalog()
     max_bars = int((max_seconds or 240) * 140 / 240) if max_seconds else 96
     extra = ('\n\n' + _styles.brief(_styles.get(style))) if style else ''
+    if pack:
+        extra += '\n\n' + _packs.brief(_packs.get(pack))
+    ask = {'idea': idea.strip()[:2000],
+           'length': f'about {int(max_seconds)} seconds' if max_seconds else '1.5 to 3 minutes'}
+    if _packs.variant_note(variant):
+        ask['take'] = _packs.variant_note(variant)
     messages = [{'role': 'system', 'content': _system(catalog, max_bars) + extra},
-                {'role': 'user', 'content': json.dumps({'idea': idea.strip()[:2000],
-                 'length': f'about {int(max_seconds)} seconds' if max_seconds else '1.5 to 3 minutes'})}]
+                {'role': 'user', 'content': json.dumps(ask)}]
     return _validated(ai, messages, max_seconds, validate=validate)
 
 
