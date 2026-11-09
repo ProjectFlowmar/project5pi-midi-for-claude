@@ -170,3 +170,29 @@ def test_branded_checkout_session(svc, monkeypatch):
     assert a['mode'] == 'subscription' and a['allow_promotion_codes'] == 'true'
     assert a['branding_settings[display_name]'] == 'P5 MIDI Studio by Project5pi'
     assert a['branding_settings[icon][file]'] == 'file_123'
+
+
+def test_buy_link_get_makes_no_stripe_session(svc, monkeypatch):
+    # 11/8: crawlers opening /buy/* minted live sessions that later alerted as "checkout abandoned"
+    import threading, urllib.request, urllib.error
+    monkeypatch.setenv('P5H_PRICE_MONTHLY', 'price_m')
+    srv = H.ThreadingHTTPServer(('127.0.0.1', 0), H.make_handler(svc))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    H.RATE.clear()
+    base = f'http://127.0.0.1:{srv.server_address[1]}'
+    try:
+        before = len(svc.checkout_calls)
+        html = urllib.request.urlopen(base + '/buy/monthly').read().decode()
+        assert 'method="post" action="/buy/monthly"' in html and len(svc.checkout_calls) == before
+
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *a, **k):
+                return None
+        try:
+            urllib.request.build_opener(NoRedirect).open(urllib.request.Request(base + '/buy/monthly', data=b'', method='POST'))
+            raise AssertionError('expected a 303')
+        except urllib.error.HTTPError as e:
+            assert e.code == 303 and e.headers['location'].endswith('price_m')
+        assert len(svc.checkout_calls) == before + 1
+    finally:
+        srv.shutdown()

@@ -353,6 +353,13 @@ class Service:
 
 
 RATE = {}
+BUY_PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>P5 MIDI Studio checkout</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#F1F2F0;color:#0D100F;font:16px/1.5 Inter,system-ui,sans-serif}
+main{text-align:center;padding:24px}button{font:inherit;font-weight:600;padding:14px 28px;border:0;background:#0D100F;color:#fff;cursor:pointer}</style></head>
+<body><main><p>Taking you to secure checkout for P5 MIDI Studio...</p>
+<form id="f" method="post" action="/buy/{plan}"><button type="submit">Continue to checkout</button></form></main>
+<script>setTimeout(function(){document.getElementById('f').submit()},150)</script></body></html>"""
 
 
 def make_handler(svc: Service):
@@ -374,36 +381,55 @@ def make_handler(svc: Service):
             self.end_headers()
             self.wfile.write(data)
 
+        def page(self, html):
+            data = html.encode()
+            self.send_response(200)
+            self.send_header('content-type', 'text/html; charset=utf-8')
+            self.send_header('cache-control', 'no-store')
+            self.send_header('x-robots-tag', 'noindex, nofollow')
+            self.send_header('content-length', str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
         def do_GET(self):
             if self.path in ('/buy/monthly', '/buy/yearly'):
-                bucket = RATE.setdefault('buy:' + self.ip(), [])
-                now = time.time()
-                bucket[:] = [t for t in bucket if now - t < 60]
-                if len(bucket) >= 10:
-                    return self.send(429, {'error': 'Too many requests. Wait a minute.'})
-                bucket.append(now)
-                try:
-                    url = svc.checkout_url(self.path.rsplit('/', 1)[1])
-                except Exception as e:
-                    print('checkout error', type(e).__name__, str(e)[:200], flush=True)
-                    return self.send(503, {'error': 'Checkout is not available right now. Please try again shortly.'})
-                self.send_response(303)
-                self.send_header('location', url)
-                self.send_header('cache-control', 'no-store')
-                self.send_header('content-length', '0')
-                self.end_headers()
-                return
+                # 11/8: a GET used to create a Stripe session, so link scanners and crawlers (both plans in the same second)
+                # minted live sessions that expired 24 h later as "checkout abandoned" alerts. A GET now only shows a
+                # one-button page; the session is made by the POST, which a person's click (or the page's script) sends.
+                print('buy page', self.path, (self.headers.get('user-agent') or '-')[:120], flush=True)
+                return self.page(BUY_PAGE.replace('{plan}', self.path.rsplit('/', 1)[1]))
             if self.path == '/v1/plans':
                 return self.send(200, svc.plans())
             if self.path == '/health':
                 return self.send(200, {'ok': True})
             return self.send(404, {'error': 'not found'})
 
+        def buy(self):
+            bucket = RATE.setdefault('buy:' + self.ip(), [])
+            now = time.time()
+            bucket[:] = [t for t in bucket if now - t < 60]
+            if len(bucket) >= 10:
+                return self.send(429, {'error': 'Too many requests. Wait a minute.'})
+            bucket.append(now)
+            try:
+                url = svc.checkout_url(self.path.rsplit('/', 1)[1])
+            except Exception as e:
+                print('checkout error', type(e).__name__, str(e)[:200], flush=True)
+                return self.send(503, {'error': 'Checkout is not available right now. Please try again shortly.'})
+            self.send_response(303)
+            self.send_header('location', url)
+            self.send_header('cache-control', 'no-store')
+            self.send_header('content-length', '0')
+            self.end_headers()
+
         def do_POST(self):
             n = int(self.headers.get('content-length') or 0)
             if n > 400_000:
                 return self.send(413, {'error': 'too big'})
             raw = self.rfile.read(n)
+            if self.path in ('/buy/monthly', '/buy/yearly'):
+                print('buy click', self.path, (self.headers.get('user-agent') or '-')[:120], flush=True)
+                return self.buy()
             if self.path == '/stripe/webhook':
                 if not stripe_signature_ok(raw, self.headers.get('stripe-signature', ''), env('STRIPE_WEBHOOK_SECRET')):
                     return self.send(400, {'error': 'bad signature'})
