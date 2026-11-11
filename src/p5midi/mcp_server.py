@@ -28,26 +28,39 @@ mcp = FastMCP('p5midi', instructions=(
     'read the analysis notes, adjust the spec, repeat. You cannot hear the audio: rely on the analysis numbers '
     'and ask the user to listen before calling a song finished.'))
 
+# Tool hints for clients (MCP ToolAnnotations). Every tool works on local files only (openWorld False);
+# the writers overwrite their output path (destructive) but give the same result when re-run (idempotent).
+READ = {'readOnlyHint': True, 'destructiveHint': False, 'idempotentHint': True, 'openWorldHint': False}
+WRITE = {'readOnlyHint': False, 'destructiveHint': True, 'idempotentHint': True, 'openWorldHint': False}
 
-@mcp.tool()
+
+def _tool(hints: dict):
+    try:
+        from mcp.types import ToolAnnotations
+        return mcp.tool(annotations=ToolAnnotations.model_validate(hints))
+    except (ImportError, TypeError):  # older SDKs without annotations
+        return mcp.tool()
+
+
+@_tool(READ)
 def list_templates() -> list[dict]:
     """FL Studio templates on this machine. Each keeps its instruments, mixer and effects."""
     return _fl.list_templates()
 
 
-@mcp.tool()
+@_tool(READ)
 def inspect_template(template: str) -> dict:
     """Channels (instrument names and plugins) in a template name or .flp path."""
     return Project.load(_fl.find_template(template)).summary()
 
 
-@mcp.tool()
+@_tool(READ)
 def spec_format() -> str:
     """The song spec JSON format, with examples."""
     return SPEC_HELP
 
 
-@mcp.tool()
+@_tool(WRITE)
 def build_song(spec: dict | str, out_path: str) -> dict:
     """Write an .flp (and .mid) from a spec, without rendering. out_path ends in .flp."""
     from .song import build
@@ -59,7 +72,7 @@ def build_song(spec: dict | str, out_path: str) -> dict:
     return {'project': str(out.resolve()), 'midi': str(export_midi(res, out.with_suffix('.mid'))), **res.report()}
 
 
-@mcp.tool()
+@_tool(WRITE)
 def make_song(spec: dict | str, out_path: str, lufs: float = -10.0, reference: str | None = None) -> dict:
     """Build + render with FL Studio + master to MP3 + analyze. Needs Windows, FL Studio closed, ffmpeg."""
     from .cli import make
@@ -69,20 +82,20 @@ def make_song(spec: dict | str, out_path: str, lufs: float = -10.0, reference: s
     return make(str(tmp), out_path, lufs=lufs, reference=reference)
 
 
-@mcp.tool()
+@_tool(WRITE)
 def render(flp_path: str, fmt: str = 'wav') -> str:
     """Render an existing .flp with FL Studio's command line. Returns the audio path."""
     return str(_fl.render(flp_path, fmt))
 
 
-@mcp.tool()
+@_tool(READ)
 def analyze_audio(path: str, reference: str | None = None) -> dict:
     """Loudness, true peak, six-band balance, stereo width; optional comparison to a reference track."""
     from .analyze import analyze
     return analyze(path, None, reference)
 
 
-@mcp.tool()
+@_tool(WRITE)
 def master_audio(src: str, dst: str, lufs: float = -10.0, ceiling_db: float = -1.0) -> dict:
     """Loudness-normalise and limit a render (mp3/wav/flac by extension)."""
     from .analyze import master
